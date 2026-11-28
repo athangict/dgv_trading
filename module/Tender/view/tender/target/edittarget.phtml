@@ -1,0 +1,197 @@
+<?php
+/**
+ * View -- of Purchase/PurchaseController/addporderAction
+ */
+  $this->headTitle($this->title);
+  foreach($target as $targets);
+?>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="widget widget-box">
+			<div class="widget-header">
+				<h5 class="widget-title lighter smaller">
+					<i class="fa fa-asterisk"></i>&nbsp;&nbsp;Edit Tender
+				</h5>
+			</div><!-- end of widget-header -->
+			<div class="widget-body">
+				<div class="widget-main">
+					<form id="#form" method="post" action="<?php echo $this->url('target', array('action' => 'edittarget','id'=>$targets['id'])); ?>"  enctype="multipart/form-data" >    
+						<div class="row">	
+							<div class="col-lg-3">    
+								<div class="form-group">
+									<label for="year" class="control-label">Year</label>
+									<div class="date input-group" id="year" data-date="<?php echo date('Y-m-d');?>" data-date-format="yyyy-mm-dd" >
+										<input class="form-control span2" name="year" id="year" type="text" placeholder="Date" value="<?php echo $targets['year'];?>" >
+										<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-3"> 
+								<div class="form-group">
+									<label for="period" class="control-label">Period</label>
+									<select id="period" name="period" class="form-control" data-placeholder="Select" required>
+										<option value=""></option>	
+										<?php foreach ($this->target_period as $target_periods): ?>
+											<option value="<?php echo $target_periods['id'];?>" <?php echo ($targets['period']==$target_periods['id'])?'selected':'';?>>
+												<?php echo $target_periods['period']; ?>
+											</option>
+										<?php endforeach; ?>								
+									</select> 
+								</div>
+							</div>
+							<!-- <div class="col-lg-3">
+								<div class="form-group">
+									<label for="tender_no" class="control-label">Tender No.</label>
+									<input type="text" class="form-control" name="tender_no" id="tender_no" placeholder="Tender No."/> 
+								</div>
+							</div>  -->
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="subperiod" class="control-label">Sub Period</label>
+									<input type="text" class="form-control" name="subperiod" id="subperiod" value="<?php echo $targets['sub_period'];?>" placeholder="sub period"/> 
+								</div>
+							</div> 
+							
+							<div class="col-lg-3"> 
+								<div class="form-group">
+									<label for="type" class="control-label">Type</label>
+									<select id="type" name="type" class="form-control" data-placeholder="Select" required>
+										<option value=""></option>	
+										<?php foreach ($this->target_type as $target_types): ?>
+											<option value="<?php echo $target_types['id'];?>" <?php echo ($targets['type']==$target_types['id'])?'selected':'';?>>
+												<?php echo $target_types['type']; ?>
+											</option>
+										<?php endforeach; ?>								
+									</select> 
+								</div>
+							</div>
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="subperiod" class="control-label">Amount</label>
+									<input type="text" class="form-control" name="amount" id="amount" value="<?php echo $targets['amount'];?>" placeholder="amount"/> 
+								</div>
+							</div> 
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="number" class="control-label">Number</label>
+									<input type="text" class="form-control" name="number" id="number" value="<?php echo $targets['number'];?>" placeholder="number"/> 
+								</div>
+							</div> 
+						<div class="row">
+							<div class="col-lg-12">
+								<label class="control-label" for="note">Note: </label>
+								<textarea class="form-control" name="note" id="note"  value="<?php echo $targets['note'];?>"></textarea>
+							</div>
+						</div>
+						<div class="space-12"></div>
+						<div class="row"> 	
+							<div class="col-lg-9"> 
+								<button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save </button>
+								<button type="button" class="btn btn-warning" onclick="javascript:history.back();" ><i class="fa fa-times"></i> Cancel </button> 					
+							</div>
+						</div>
+					</form>	
+				</div><!-- widget widget-main -->
+			</div>  <!-- widget widget-body -->   
+		</div> <!-- widget widget-box --> 
+	</div><!-- col-lg-12 -->
+</div><!-- row -->
+
+<script type="text/javascript">	 
+$(function() {
+   $('#type').on('change', function () {
+        var selectedType = $(this).val();
+
+        if (selectedType == 1 || selectedType == 2) {
+            $('#number').closest('.form-group').show();
+            $('#amount').closest('.form-group').hide();
+        } else if (selectedType == 3) {
+            $('#amount').closest('.form-group').show();
+            $('#number').closest('.form-group').hide();
+        } else {
+            $('#number').closest('.form-group').hide();
+            $('#amount').closest('.form-group').hide();
+        }
+    });
+	$('#tender_date').datepicker();
+	$('#quotation_date').datepicker();
+	/*** Form Validation of PO ***/
+	const fv = FormValidation.formValidation(document.getElementById('#form'), {
+		fields: {
+			'po_date': {
+				validators: {
+					notEmpty: {
+						message: 'Please select PO date'
+					}
+				}
+			},
+			'supplier': {
+				validators: {
+					notEmpty: {
+						message: 'Please select supplier'
+					}
+				}
+			},
+			'activity': {
+				validators: {
+					notEmpty: {
+						message: 'Please select activity'
+					}
+				}
+			},
+			'location': {
+				validators: {
+					notEmpty: {
+						message: 'Please select location'
+					}
+				}
+			}, 
+			'quantity[]': {
+				validators: {
+					notEmpty: {
+						message: 'Please provide quantity'
+					}
+				}
+			},
+			'rate[]': {
+				validators: {
+					notEmpty: {
+						message: 'Please provide rate'
+					}
+				}
+			},
+			'amount[]':{
+				validators:{
+					notEmpty:{
+						message:'Please provide amount'
+					},
+				},
+			},
+			'po_amount':{
+				validators:{
+					notEmpty:{
+						message:'Please provide Net PO Amount',
+					},
+				},
+			},
+		},
+		plugins: {
+			trigger: new FormValidation.plugins.Trigger(),
+			bootstrap3: new FormValidation.plugins.Bootstrap3(),
+			submitButton: new FormValidation.plugins.SubmitButton(),
+			defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+		},
+	}).on('core.element.validated', function (e) {
+		if (e.valid) {
+			$('div#'+ e.field.replace('[]','') +'_chosen').removeClass('is-invalid');
+			$('div#'+ e.field.replace('[]','') +'_chosen').addClass('is-valid');
+		} else {
+			$('div#'+ e.field.replace('[]','') +'_chosen').removeClass('is-valid');
+			$('div#'+ e.field.replace('[]','') +'_chosen').addClass('is-invalid');
+		}
+	});
+	//$('#po_date').on('changeDate',function(){
+	//	$('form').formValidation('revalidateField', $(this).attr('id'));
+	//});
+});      
+</script>

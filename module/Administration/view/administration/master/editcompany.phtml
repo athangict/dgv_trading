@@ -1,0 +1,164 @@
+
+<?php
+/**
+ * View -- of Administration/MasterController/editcompany
+ * chophel@athang.com
+ */
+$company = $company[0] ?? $company;
+$this->headTitle($this->title);
+?>
+
+<form id="form" method="post"
+      action="<?php echo $this->url('setmaster', array('action' => 'editcompany')); ?>"
+      enctype="multipart/form-data">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"
+                aria-hidden="true">&times;</button>
+
+        <h4 class="modal-title">
+            <i class="ace-icon fa fa-edit"></i>
+            <?php echo $this->title; ?>
+        </h4>
+    </div>
+
+    <div class="modal-body">
+        <div class="panel panel-default">
+            <div class="panel-body">
+
+                <input type="hidden" name="id"
+                       value="<?php echo $company['id'] ?? ''; ?>">
+
+                <div class="row">
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="tpn">TPN No</label>
+                        <input type="text" class="form-control"
+                               name="tpn" id="tpn"
+                               placeholder="Enter TPN No"
+                               value="<?php echo $company['tpn_no'] ?? ''; ?>" />
+                    </div>
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="email">Email</label>
+                        <input type="text" class="form-control"
+                               name="email" id="email"
+                               placeholder="Email Address"
+                               value="<?php echo $company['email'] ?? ''; ?>" />
+                    </div>
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="contact_no">Contact No</label>
+                        <input type="text" class="form-control"
+                               name="contact_no" id="contact_no"
+                               placeholder="Contact No" required
+                               value="<?php echo $company['contact_no'] ?? ''; ?>" />
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="bank">Bank</label>
+
+                        <select id="bank" name="bank"
+                                class="form-control"
+                                data-placeholder="Select">
+
+                            <option value="-1">Select</option>
+
+                            <?php foreach ($bank as $banks): ?>
+                                <option value="<?php echo $banks['id']; ?>"
+                                    <?php echo (
+                                        (string)$company['bank'] ===
+                                        (string)$banks['id']
+                                    ) ? 'selected="selected"' : ''; ?>>
+                                    <?php echo $banks['bank']; ?>
+                                </option>
+                            <?php endforeach; ?>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="account_no">Account No</label>
+                        <input type="text" class="form-control"
+                               name="account_no" id="account_no"
+                               placeholder="Account No"
+                               value="<?php echo $company['account_no'] ?? ''; ?>" />
+                    </div>
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="account_name">Account Name</label>
+                        <input type="text" class="form-control"
+                               name="account_name" id="account_name"
+                               placeholder="Account Name"
+                               value="<?php echo $company['account_name'] ?? ''; ?>" />
+                    </div>
+
+                    <div class="form-group col-lg-4">
+                        <label class="control-label" for="website">Website</label>
+                        <input type="text" class="form-control"
+                               name="website" id="website"
+                               placeholder="Website"
+                               value="<?php echo $company['website'] ?? ''; ?>" />
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">
+            <i class="ace-icon fa fa-check"></i> Update
+        </button>
+
+        <button type="button" class="btn btn-warning"
+                data-dismiss="modal">
+            <i class="ace-icon fa fa-times"></i> Cancel
+        </button>
+    </div>
+
+</form>
+
+<script>
+$(function () {
+
+    const form = document.getElementById('form');
+
+    const fv = FormValidation.formValidation(form, {
+        fields: {
+            tpn: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please enter TPN.'
+                    }
+                }
+            },
+            contact_no: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please enter contact number.'
+                    }
+                }
+            }
+        },
+        plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            bootstrap3: new FormValidation.plugins.Bootstrap3(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+        },
+    });
+
+    $('#bank').chosen();
+
+    $('#bank').on('change', function () {
+        fv.revalidateField('bank');
+    });
+
+});
+</script>

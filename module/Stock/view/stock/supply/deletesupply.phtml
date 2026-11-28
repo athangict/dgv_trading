@@ -1,0 +1,20 @@
+<?php 
+/**
+ * View -- of Implementation/ImplementationController/confirmimplementationAction
+ * chophel@athang.com
+ */
+	$this->headTitle($this->title);
+?>
+<?php foreach($Supply as $supply);?>
+<form method="post" action="<?php echo $this->url('supply', ['action' => 'deletesupply', 'id' => $supply['id']]); ?>">
+    <div class="modal-header">
+        <h4 class="modal-title">Delete Supply</h4>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you want to delete Supply <strong><?php echo $supply['id']; ?></strong>?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" name="confirm" value="Yes" class="btn btn-danger">Delete</button>
+        <button type="submit" name="confirm" value="No" class="btn btn-primary">Cancel</button>
+    </div>
+</form>

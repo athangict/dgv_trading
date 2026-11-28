@@ -1,0 +1,72 @@
+<?php
+/**
+ * View -- of Sales/SaleController/indexAction
+ */
+	$this->headTitle($this->title);	
+?>
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+		</div>
+	</div>
+	<div class="card-body">
+		<div>
+			<table class="table table-bordered table-striped table-hover" id="dataTables">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>User</th>
+						<th>Date</th>
+						<th>Entry</th>
+						<th>Late Reason</th>
+						<th>Leave Office</th>
+						<th>Early Reason</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php $i=1; foreach($attendance as $att):
+				?>
+				
+					<tr data-href="<?php echo $this->url('user', array('action'=>'viewattendance', 'id'=>$att['user']));?>" >
+						<td><?php echo $i++; ?></td>
+						<td><?php echo $this->usersObj->getColumn($att['user'],'name'); ?></td>
+						<td><?php echo $att['date']; ?></td>
+						<?php if($att['entry']<='09:15:00'):?>
+							<td style="background-color:#3F9B0B;"><?php  echo $att['entry'];?></td>
+						<?php else:?>
+							<td style="background-color:#FFD801;"><?php echo $att['entry'];?></td>
+						<?php endif;?>
+							<td><?php if($att['entry']>='09:15:00' && $att['late_reason']=="" && $att['date']== date('Y-m-d') ):?>
+							<a class="btn btn-xs btn-primary" data-target="#modal" data-toggle="modal"  href="<?php echo $this->url('user', array('action' => 'late','id'=>$att['id'])); ?>">
+							Reason for late 
+							</a><?php else: echo $att['late_reason']; endif;?></td>
+							<?php if($att['exit']>=$timing):?>
+								<td style="background-color:#3F9B0B;"><?php echo $att['exit'];?></td>
+							<?php elseif($att['exit']==null):?>
+							<td></td>
+							<?php else:?>
+								<td style="background-color:#FFD801;"><?php echo $att['exit'];?></td>
+							<?php endif;?>
+							<td><?php if($att['exit']<$timing && $att['exit']!=null && $att['early_reason']=="" && $att['date']== date('Y-m-d') ):?>
+							<a class="btn btn-xs btn-primary" data-target="#modal" data-toggle="modal"  href="<?php echo $this->url('user', array('action' => 'early','id'=>$att['id'])); ?>">
+							Reason for early leaving 
+							</a><?php else: echo $att['early_reason'];endif;?></td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>	
+			</table>
+		</div>
+	</div>
+</div>
+<div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content"> </div>
+	</div>
+</div>
+<script>	
+$('document').ready(function(){
+	$('#dataTables').DataTable({
+		"paging":   true,
+	});
+});
+</script>

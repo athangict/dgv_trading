@@ -1,0 +1,160 @@
+<?php
+/**
+ * 
+ * View -- of Purchase/PurchaseController/indexAction
+ * 
+ */
+ 	$this->headTitle($this->title);
+?>
+<?php $minYear = date('Y', strtotime($minYear)); ?> 
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<form method="post" action="<?php echo $this->url('tender', array('action'=>'index')); ?>"  enctype="multipart/form-data" >
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="year">Year</label>
+					<select class="form-control" id="year" name="year" data-placeholder="Select" onchange='this.form.submit()'>
+						<option value=""></option>
+						<?php 
+							for($year=date('Y');$year>=$minYear;$year--):
+								$selected = ($year == $data['year'])?"selected":"";
+						?>
+							<option value="<?php echo $year;?>" <?php echo $selected;?> >
+								<?php echo $year;?> 
+							</option>
+						<?php endfor; ?>
+					</select>
+				</div>
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="month">Month</label>
+					<select class="form-control" id="month" name="month" data-placeholder="Select" onchange='this.form.submit()'>
+						<option value="-1" <?php echo ($data['month'] == '-1')?'selected':'';?>>All</option>
+						<?php for($month=1; $month<=12; $month++):?>
+							<?php $selected = ($month == $data['month'])?'selected':'';?>
+							<option value="<?php echo $month;?>" <?php echo $selected; ?>>
+								<?php echo DateTime::createFromFormat('!m', $month)->format('F');?>
+							</option> 
+						<?php endfor;?>
+					</select>
+				</div>
+			</form>
+			<div class="col-lg-6">
+				<div class="clearfix">
+					<div class="btn-group pull-right">
+						<?php echo $this->button(2);?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div>
+		<table class="table table-striped table-bordered table-hover" id="dataTables">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Tender Nos.</th>
+					<th>Tender Dateline</th>
+					<th>Agency</th>
+					<th>Tender Amount</th>
+					<th>Bid Security Date</th>
+					<th>Bid Security</th>
+					<th>Performance Security Date</th>
+					<th>Performance Security</th>
+					<th>Remarks</th>
+					<th>User</th>
+					<th class="no-sort no-printpdf">Action</th>						
+				</tr>
+			</thead>
+			<tbody>
+				<?php $sl=1;?>
+				<?php foreach($this->tender_results as $row):
+					//echo '<pre>';print_r($row);exit;
+					?>
+					<tr data-href="<?php echo $this->url('tender', array('action'=>'viewtender', 'id'=>$row['id']));?>">
+						<td><?php echo $sl++;?></td>
+						<td>
+							<b><?php echo $row['tender_no'];?></b>
+							&nbsp;<?php $this->status($row['status']);?> 
+						</td>
+						<td><?php echo $row['date'];?></td>
+						<td><?php echo $this->partyObj->getCOlumn($row['agency'],'name');?></td>
+						<td><?php echo $this->currency($row['amount']);?></td>
+						<td><?php echo $row['bid_date'];?></td>
+						<td><?php echo $row['bid_security'];?></td>
+						<td><?php echo $row['psecurity_date'];?></td>
+						<td><?php echo $row['performance_security'];?></td>
+						<td><?php echo $row['note'];?></td>
+						<td><?php echo $this->userObj->getColumn($row['author'],'name');?></td>
+						
+						<td class="action">
+							<div class="btn-group">
+								<!-- <a class="btn btn-xs btn-primary" href="<?php echo $this->url('tender', array('action' => 'viewporder', 'id'=>$row['id'])); ?>" >
+									<i class="ace-icon fa fa-eye bigger-120" ></i>  
+								</a> -->
+								<?php if($row['status']==2 || $row['status'] == 20  || $row['status'] == 18):?>
+									<a class="btn btn-xs btn-primary" href="<?php echo $this->url('tender', array('action' => 'edittender', 'id'=>$row['id'])); ?>" >
+									<i class="ace-icon fa fa-edit bigger-120" ></i>  
+								</a>
+								<a class="btn btn-xs btn-primary" data-toggle="modal" data-target="#modal" href="<?php echo $this->url('tender', array('action' => 'updatetender', 'id'=>$row['id'])); ?>">
+									Update  
+								</a>
+									<?php endif;?>
+									
+							</div>
+						</td>								
+					</tr>
+				<?php endforeach;?>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$('document').ready(function(){
+    $('#dataTables').DataTable({
+        "paging": true,
+    });
+
+
+    $("tr").each(function() {
+        var tenderDate = $(this).find("td:nth-child(3)").text(); 
+        var bidDate = $(this).find("td:nth-child(6)").text(); 
+        var psecurityDate = $(this).find("td:nth-child(8)").text(); 
+
+        
+        var tenderDateObj = new Date(tenderDate);
+        var bidDateObj = new Date(bidDate);
+        var psecurityDateObj = new Date(psecurityDate);
+
+        
+        if (bidDateObj > tenderDateObj) {
+            $(this).find("td:nth-child(6)").css('background-color', 'red'); 
+        } else if (bidDateObj < tenderDateObj) {
+            $(this).find("td:nth-child(6)").css('background-color', 'green'); 
+        }
+
+        
+        if (psecurityDateObj > tenderDateObj) {
+            $(this).find("td:nth-child(8)").css('background-color', 'red'); 
+        } else if (psecurityDateObj < tenderDateObj) {
+            $(this).find("td:nth-child(8)").css('background-color', 'green'); 
+        }
+    });
+
+   
+    $("tr[data-href]").each(function(){
+        $(this).find('td').not('td.action').each(function(){
+            $(this).css('cursor','pointer');
+            $(this).bind('click',function() {
+                window.document.location = $(this).closest('tr').attr("data-href");
+            });
+        });
+    });
+});
+
+</script>

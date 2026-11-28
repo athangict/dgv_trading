@@ -1,0 +1,274 @@
+<?php
+/**
+ * View -- of SupplyController/editsupplydtlAction
+ */
+$this->headTitle($this->title);
+foreach($supply_address as $add);
+?>
+<style>
+    .input-cell {
+        max-width: 100px;
+    }
+    .mytable tr th, .mytable tr td {
+        padding: 5px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="widget widget-box">
+            <div class="widget-header">
+                <h5 class="widget-title lighter smaller">
+                    <i class="fa fa-asterisk"></i>&nbsp;&nbsp;Edit Supply Details
+                </h5>
+            </div>
+            <div class="widget-body">
+                <div class="widget-main">
+                    <form id="form" method="post"
+                          action="<?php echo $this->url('supply', array('action' => 'editsupplydtl','id'=>$add['id'])); ?>"
+                          enctype="multipart/form-data">
+
+                        <div class="col-lg-3"> 
+                            <div class="form-group">
+                                <label for="supply_date" class="control-label">Supply Date</label>
+                                <div class="date input-group" id="supply_date" data-date="<?php echo date('Y-m-d');?>" data-date-format="yyyy-mm-dd" >
+                                    <input class="form-control span2" name="supply_date" id="supply_date" type="text" placeholder="Supply Date" value="<?php echo $add['date'];?>" readonly required>
+                                    <span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="control-label" for="address">Address: </label>
+                            <input class="form-control" name="address" id="address" value="<?php echo $add['address'];?>">
+                        </div>
+
+                        <input type="hidden" name="supply" id="supply" value="<?php echo $add['supply'];?>">
+
+                        <div class="row">
+                            <div class="col-lg-12"> 
+                                <table class="table table-bordered table-striped small-padding" id="supplydtl_field" >
+                                    <thead>
+                                        <tr>
+                                            <th>Item Class</th>
+                                            <th>Item</th>
+                                            <th>Tender Sl.No</th>
+                                            <th>Batch No</th>
+                                            <th>Mftg. Date</th>
+                                            <th>Exp Date</th>
+                                            <th>Quantity</th>
+                                            <th>Rate</th>
+                                            <th>Gst Rate</th>
+                                            <th>Gst Amt</th>
+                                            <th>Amount</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach($supply_details as $row): ?>
+                                        <input type="hidden" class="form-control" name="id[]" value="<?php echo $row['id'];?>"/>
+                                        <tr class="form-group removeclass1">
+                                            <td>
+                                                <select class="form-control tr_item_class" name="item_class[]" id="item_class" >
+                                                    <option value="">Select </option>
+                                                    <?php foreach($itemClass as $itemC):?>
+                                                    <option value="<?php echo $itemC['id'];?>"<?php echo ($itemC['id']==$row['item_class'])?'selected':'';?>><?php echo $itemC['item_class'];?></option>
+                                                    <?php endforeach;?>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control tr_item" name="item[]" id="item">
+                                                    <option value=""></option>
+                                                    <?php foreach($item as $items):?>
+                                                    <option value="<?php echo $items['id'];?>"<?php echo ($items['id']==$row['item'])?'selected':'';?>><?php echo $items['name'];?></option>
+                                                    <?php endforeach;?>
+                                                </select>
+                                            </td>
+                                            <td><input type="text" class="form-control tr_tender_slNo" name="tender_slNo[]" value="<?php echo $row['tender_slNo'];?>"></td>
+                                            <td><input type="text" class="form-control tr_batch_no" name="batch_no[]" value="<?php echo $row['batch_no'];?>"></td>
+                                            <td><input type="text" class="form-control tr_mftg_date" name="mftg_date[]" value="<?php echo $row['manufactured_date'];?>"></td>
+                                            <td><input type="text" class="form-control tr_exp_date" name="exp_date[]" value="<?php echo $row['expiry_date'];?>"></td>
+                                            <td><input type="text" class="form-control tr_quantity" name="quantity[]" value="<?php echo $row['quantity'];?>"></td>
+                                            <td><input type="text" class="form-control tr_rate" name="rate[]" value="<?php echo $row['rate'];?>"></td>
+                                            <td><input type="text" class="form-control gst_rate" name="gst_rate[]" value="<?php echo $row['gst_rate'];?>" readonly></td>
+                                            <td><input type="text" class="form-control gst_amt" name="gst_amt[]" value="<?php echo $row['gst_amt'];?>" readonly></td>
+                                            <td><input type="text" class="form-control tr_amount" name="amount[]" value="<?php echo $row['amount'];?>"></td>
+                                            <td><input type="text" class="form-control" name="remarks[]" value="<?php echo $row['remarks'];?>"></td>
+                                        </tr>
+                                        <?php endforeach;?>
+                                    </tbody>
+                                </table>
+
+                                <div class="row">
+                                    <div class="col-lg-12 text-right">
+                                        <button class="btn btn-xs btn-success" type="button" onclick="supplydtl_field();">
+                                            <i class="fa fa-plus-square"></i> Add Row
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="total">Total</label>
+                                    <input type="text" class="form-control tr_total" name="total" id="total" value="<?php echo $add['total'];?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="gst_total">GST Total</label>
+                                    <input type="text" class="form-control gst_total" name="gst_total" id="gst_total" value="<?php echo $add['gst_total'];?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label for="grand_total">Grand Total</label>
+                                    <input type="text" class="form-control grand_total" name="grand_total" id="grand_total" value="<?php echo $add['grand_total'];?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-12"></div>
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save </button>
+                                <button type="button" class="btn btn-warning" onclick="javascript:history.back();">
+                                    <i class="fa fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div> <!-- end of widget-main -->
+            </div> <!-- end of widget-body -->
+        </div> <!-- end of widget -->
+    </div>
+</div>
+
+<script type="text/javascript">
+    var room = 1;
+
+    function supplydtl_field() {
+        room++;
+        var newRow = `
+        <tr class="form-group removeclass${room}">
+            <td>
+                <select class="form-control tr_item_class" name="item_class[]">
+                    <option value="">Select</option>
+                    <?php foreach($itemClass as $itemC): ?>
+                        <option value="<?php echo $itemC['id'];?>"><?php echo $itemC['item_class'];?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+            <td>
+                <select class="form-control tr_item" name="item[]">
+                    <option value=""></option>
+                </select>
+            </td>
+            <td><input type="text" class="form-control tr_tender_slNo" name="tender_slNo[]" placeholder="Tender Sl.No"></td>
+            <td><input type="text" class="form-control tr_batch_no" name="batch_no[]" placeholder="Batch No"></td>
+            <td><input type="text" class="form-control tr_mftg_date" name="mftg_date[]" value="<?php echo date('Y-m-d');?>" readonly></td>
+            <td><input type="text" class="form-control tr_exp_date" name="exp_date[]" value="<?php echo date('Y-m-d');?>" readonly></td>
+            <td><input type="number" class="form-control tr_quantity" name="quantity[]" value="0"></td>
+            <td><input type="number" step="0.0001" class="form-control tr_rate" name="rate[]" value="0.00"></td>
+            <td><input type="text" class="form-control gst_rate"  name="gst_rate[]" value="0" readonly></td>
+            <td><input type="text" class="form-control gst_amt"  name="gst_amt[]" value="0" readonly></td>
+            <td><input type="number" step="0.01" class="form-control tr_amount" name="amount[]" value="0.00" readonly></td>
+            <td class="d-flex align-items-center">
+                <input type="text" class="form-control" name="remarks[]" placeholder="Remarks">
+                <button type="button" class="btn btn-danger btn-xs" onclick="remove_supplydtl_field(${room});" style="margin-left:5px;">
+                    <i class="fa fa-times"></i>
+                </button>
+            </td>
+        </tr>`;
+
+        $('#supplydtl_field tbody').append(newRow);
+        $('.tr_exp_date, .tr_mftg_date').datepicker({ format: 'yyyy-mm-dd', autoclose: true });
+        calculateTotalAmount();
+        updateGstTotal();
+    }
+
+    function remove_supplydtl_field(rid) {
+        $('.removeclass' + rid).remove();
+        calculateTotalAmount();
+        updateGstTotal();
+    }
+
+    $('#supply_date').datepicker({ format: 'yyyy-mm-dd', autoclose: true });
+
+    function calculateTotal(element) {
+        var row = element.closest('tr');
+        var rate = parseFloat(row.find('.tr_rate').val()) || 0;
+        var quantity = parseFloat(row.find('.tr_quantity').val()) || 0;
+        var gstRate = parseFloat(row.find('.gst_rate').val()) || 0;
+
+        var amount = rate * quantity;
+        var gstAmount = (amount * gstRate) / 100;
+
+        row.find('.tr_amount').val(amount.toFixed(2));
+        row.find('.gst_amt').val(gstAmount.toFixed(2));
+
+        calculateTotalAmount();
+        updateGstTotal();
+    }
+
+    $(document).on('input', '.tr_rate, .tr_quantity', function() {
+        calculateTotal($(this));
+    });
+
+    $(document).on('change', '.tr_item', function () {
+        var selectedOption = $(this).find(':selected');
+        var gstRate = selectedOption.data('gst') || 0;
+
+        var row = $(this).closest('tr');
+        row.find('.gst_rate').val(gstRate);
+
+        calculateTotal(row.find('.tr_rate'));
+    });
+
+    $(document).on('change', '.tr_item_class', function() {
+        var selectedClass = $(this).val();
+        var relatedItemElement = $(this).closest('tr').find('.tr_item');
+        $.post(
+            "<?php echo $this->url('supply', array('action' => 'getitem')); ?>",
+            { itemclassId: selectedClass },
+            function(data) {
+                relatedItemElement.html(data.item);
+                relatedItemElement.trigger('chosen:updated');
+            }, 'json'
+        );
+    });
+
+    function calculateTotalAmount() {
+        var total = 0;
+        $('.tr_amount').each(function() {
+            var amount = parseFloat($(this).val());
+            if (!isNaN(amount)) total += amount;
+        });
+        $('#total').val(total.toFixed(2));
+        calculateGrandTotal();
+    }
+
+    function updateGstTotal() {
+        var totalGst = 0;
+        $('.gst_amt').each(function() {
+            var gst = parseFloat($(this).val()) || 0;
+            totalGst += gst;
+        });
+        $('#gst_total').val(totalGst.toFixed(2));
+        calculateGrandTotal();
+    }
+
+    function calculateGrandTotal() {
+        var total = parseFloat($('#total').val()) || 0;
+        var gstTotal = parseFloat($('#gst_total').val()) || 0;
+        $('#grand_total').val((total + gstTotal).toFixed(2));
+    }
+
+    $(document).ready(function() {
+        $('.tr_exp_date, .tr_mftg_date').datepicker({ format: 'yyyy-mm-dd', autoclose: true });
+        $('.tr_rate, .tr_quantity').each(function() { calculateTotal($(this)); });
+        calculateTotalAmount();
+        updateGstTotal();
+    });
+</script>

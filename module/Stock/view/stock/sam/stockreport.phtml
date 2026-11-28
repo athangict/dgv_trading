@@ -1,0 +1,243 @@
+<?php
+/**
+ * 
+ * View -- of Stock/GoodsrequestController/indexAction
+ * 
+ */
+	$this->headTitle($this->title);
+?>
+<?php echo $this->partial('stock/sam/partial.phtml', array('active' => 'stockreport')); ?><br/>
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<form method="post" action="<?php echo $this->url('sam',array('action'=>'stockreport')); ?>"  enctype="multipart/form-data" >
+			   <div class="form-group col-lg-2">
+					<label class="control-label" for="start_date">Start Date</label>
+					<div class="date input-group" id="start_date" data-date="<?php echo $data['start_date'];?>" data-date-format="yyyy-mm-dd" >
+						<input class="form-control span2" name="start_date" id="start_date" type="text" placeholder="Start Date" value="<?php echo $data['start_date'];?>"  required>
+						<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+					</div>
+				</div>
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="end_date">End Date</label>
+					<div class="date input-group" id="end_date" data-date="<?php echo $data['end_date'];?>" data-date-format="yyyy-mm-dd" >
+						<input class="form-control span2" name="end_date" id="end_date" type="text" placeholder="End Date" value="<?php echo $data['end_date'];?>"  required>
+						<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+					</div>
+				</div>
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="location">Location</label>
+					<select class="form-control" id="location" name="location" data-placeholder="Select">
+						<option value="-1">All</option>
+						<?php 
+							foreach($this->locationObj->getAll() as $locations): 
+							//echo '<pre>';print_r($activities);exit;
+							$selected_act = ($locations['id']==$data['location'])?'selected':'';?>
+							<option value="<?php echo $locations['id'];?>" <?php echo $selected_act;?>>
+								<?php echo $locations['location'];?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>	
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="class">Item Class</label>
+					<select class="form-control" id="class" name="class" data-placeholder="Select" >
+						<option value="-1">All</option>
+						<?php 
+							foreach($this->classObj->getAll() as $class): 
+							//echo '<pre>';print_r($activities);exit;
+							$selected_act = ($class['id']==$data['class'])?'selected':'';?>
+							<option value="<?php echo $class['id'];?>" <?php echo $selected_act;?>>
+								<?php echo $class['item_class'];?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>	
+				<div class="form-group col-lg-2">
+					<label class="control-label" for="group">Item Group</label>
+					<select class="form-control" id="group" name="group" data-placeholder="Select" >
+						<option value="-1">All</option>
+						<?php 
+							foreach($this->groupObj->getAll() as $groups): 
+							//echo '<pre>';print_r($activities);exit;
+							$selected_act = ($groups['id']==$data['group'])?'selected':'';?>
+							<option value="<?php echo $groups['id'];?>" <?php echo $selected_act;?>>
+								<?php echo $groups['item_group'];?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>	
+			   <div class="form-group col-lg-2">
+					<label class="control-label" for="item">Item</label>
+					<select class="form-control" id="item" name="item" data-placeholder="Select">
+						<option value="-1">All</option>
+						<?php 
+							foreach($this->itemObj->getAll() as $items): 
+							//echo '<pre>';print_r($activities);exit;
+							$selected_act = ($items['id']==$data['item'])?'selected':'';?>
+							<option value="<?php echo $items['id'];?>" <?php echo $selected_act;?>>
+								<?php echo $items['name'];?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>	
+				<div class="form-group col-lg-1">
+					<button type="submit" class="btn btn-sm btn-success pull-right"><i class="fa fa-gear"></i> Generate </button>
+				</div>			
+			</form>
+		</div>
+		<div style="overflow: auto;">
+			<table class="table table-bordered table-condensed table-striped table-hover" id="dataTables">
+				<thead>
+				    <tr>
+						<th colspan="3">Particulars</th>
+						<th colspan="3">Opening Balance</th>
+						<th colspan="3">Inward</th>
+						<th colspan="3">OutWard</th>
+						<th colspan="3">Closing Stock</th>
+					</tr>
+					<tr>
+					    <th>#</th>
+						<th>Location</th>
+						<th>Item</th>
+						<th>Opening Qty</th>
+						<th>Opening Rate</th>
+						<th>Opening Value</th>
+						<th>Purschased Qty</th>
+						<th>Purschased Rate</th>
+						<th>Purschased Value</th>
+						<!-- <th>Dispatch</th>
+						<th>Dispatch</th> -->
+						<th>Supply Qty</th>
+						<th>Supply Rate</th>
+						<th>Supply Value</th>
+						<th>Closing Qty</th>
+						<th>Closing Rate</th>
+						<th>Closing Value</th>
+					</tr>
+				</thead>
+				<tbody>					
+					<?php $i=1;$total_val=0;$total_cl=0;$total_op=0;$op_val=0;$total_supply=0;$supply=0;
+						foreach($openingstocks as $row):
+						$current_supply=$this->supplyObj->getSumCurrent(array('s.location'=>$row['location'],'sd.item'=>$row['item'],'s.status'=>4),$data);
+						$pre_supply=$this->supplyObj->getSumPre($row['location'],$row['item'],$data);
+						
+						$current_pur=$this->purchaseObj->getSumCurrent(array('p.location'=>$row['location'],'pd.item'=>$row['item'],'p.status'=>4),$data);
+						$pre_pur=$this->purchaseObj->getSumPre($row['location'],$row['item'],$data);
+						
+						$itemgroup=$this->itemObj->getColumn($row['item'],'item_group');
+						 if($itemgroup==67):
+						$todispatch=0;
+						$pretodispatch=0;
+						 else: 
+						//get dispatch for to location for previous month and it is used for finding the opening stock
+						$pretodispatch=$this->dispatchObj->getPreSumto($row['location'],$row['item'],$data);
+						//get dispatch for to location for current month and it is used for finding the closing stock
+						$todispatch=$this->dispatchObj->getSumto($row['location'],$row['item'],$data);
+						endif;
+						//get dispatch for from location for current month and it is used for finding the closing stock
+						$fromdispatch=$this->dispatchObj->getSumfrom($row['location'],$row['item'],$data);
+						//get dispatch for from location for previous month and it is used for finding the opening stock
+						$prefromdispatch=$this->dispatchObj->getPreSumfrom($row['location'],$row['item'],$data);
+						$openingQty = $row['opening_qty'];
+						// Calculate opening quantity based on conditions 
+						$result = $openingQty - $pre_supply+$pre_pur;
+						$closing=$result-$current_supply+$current_pur;
+						$pur_rate=$this->purchaseObj->getrate(array('p.location'=>$row['location'],'pd.item'=>$row['item']),$data);
+					?>
+						<tr>
+							<td><?php echo $i++;?></td>
+							<td><?php echo $this->locationObj->getColumn($row['location'],'location')?></td>
+							<td><?php echo $this->itemObj->getColumn($row['item'],'name')?></td>
+							
+							<td><?php 
+								// Display the result or handle non-numeric values appropriately
+								echo is_numeric($result) ? $result : 0;
+								?>
+							</td>
+							<td><?php echo $row['cost_price'];?></td>
+							<td><?php echo number_format((float)$row['cost_price']*$result,2,'.',',');?></td>
+							<td><?php echo($current_pur!="")?$current_pur:0;?></td>
+							<td><?php echo $pur_rate;?></td>
+							<td><?php echo ($current_pur!="")?$current_pur*$pur_rate:0;?></td>
+							<!-- <td><?php echo ($todispatch=="")?0:$todispatch;?></td>
+							<td><?php echo ($fromdispatch=="")?0:$fromdispatch;?></td> -->
+							<td><?php echo ($current_supply!="")?$current_supply:0;?></td>
+							<td><?php echo $row['selling_price'];?></td>
+							<td><?php echo $row['selling_price']*$current_supply;?></td>
+							<td><?php echo $closing?></td>
+							<td><?php echo $row['cost_price']?></td>
+							<td><?php echo $row['cost_price']*$closing?></td>
+						</tr>
+					<?php $total_val+=($row['cost_price']*$closing);
+							$total_cl+=$closing;
+							$total_op+=$result;
+							$op_val+=$result*$row['cost_price'];
+							$total_supply +=$current_supply;
+							$supply+=$current_supply*$row["selling_price"];
+					endforeach;//exit;?>  
+					<tr>
+					<td></td>
+					<td></td>
+					<td><b>Total</b></td>
+					<td><b><?php echo number_format($total_op);?></b></td>
+					<td></td>
+					<td><b><?php echo number_format((float)$op_val,4,'.',',');?></b></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td><b><?php echo number_format($total_supply);?></b></td>
+					<td></td>
+					<td><b><?php echo number_format((float)$supply,4,'.',',');?></b></td>
+					<td><b><?php echo number_format($total_cl);?></b></td>
+					<td></td>
+					<td><b><?php echo number_format((float)$total_val,4,'.',',');?></b></td>
+					</tr>
+					
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$('document').ready(function(){
+	$('#dataTables').DataTable({
+		"paging":   true,
+	});
+	 $('#start_date').datepicker();
+	$('#end_date').datepicker();
+	
+	$('#class').on('change', function(){
+		//alert($(this).val());
+		$.post(
+			"<?php echo $this->url('sam', array('action' => 'getItemgroup')); ?>",
+			{
+				item_class: $(this).val(),
+			},
+			function(data){
+				console.log(data);
+				$("#group").html(data.subgroup);	
+				$("#group").trigger('chosen:updated');
+			},
+			'json'
+		);	
+	});
+	$('#group,#location').on('change', function(){
+		//alert($(this).val());
+		$.post(
+			"<?php echo $this->url('sam', array('action' => 'getItemChange')); ?>",
+			{
+				locationId: $("#location").val(),
+				item_subgroup: $("#group").val(),
+			},
+			function(data){
+				console.log(data);
+				$("#item").html(data.items);	
+				$("#item").trigger('chosen:updated');
+			},
+			'json'
+		);	
+	});
+});
+</script>
+

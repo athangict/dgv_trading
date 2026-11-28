@@ -1,0 +1,236 @@
+<?php
+/**
+ * View -- of Purchase/PurchaseController/addporderAction
+ */
+  $this->headTitle($this->title);
+?>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="widget widget-box">
+			<div class="widget-header">
+				<h5 class="widget-title lighter smaller">
+					<i class="fa fa-asterisk"></i>&nbsp;&nbsp;New Tender
+				</h5>
+			</div><!-- end of widget-header -->
+			<div class="widget-body">
+				<div class="widget-main">
+					<form id="#form" method="post" action="<?php echo $this->url('tender', array('action' => 'addtender')); ?>"  enctype="multipart/form-data" >    
+						<div class="row">	
+						<div class="col-lg-3">
+								<div class="form-group">
+									<label for="tender_date" class="control-label">Tender Dateline</label>
+									<div class="input-group date" id="tender_date_picker" data-date-format="yyyy-mm-dd">
+										<input class="form-control span2" name="tender_date" id="tender_date" type="text" placeholder="Tender Date" value="<?php echo date('Y-m-d');?>" readonly>
+										<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-3"> 
+								<div class="form-group">
+									<label for="agency" class="control-label">Agency</label>
+									<select id="agency" name="agency" class="form-control" data-placeholder="Select" required>
+										<option value=""></option>	
+										<?php foreach ($this->suppliers as $supplier): ?>
+											<option value="<?php echo $supplier['id'];?>">
+												<?php echo $supplier['name']; ?>
+											</option>
+										<?php endforeach; ?>								
+									</select> 
+								</div>
+							</div>
+							<!-- <div class="col-lg-3">
+								<div class="form-group">
+									<label for="tender_no" class="control-label">Tender No.</label>
+									<input type="text" class="form-control" name="tender_no" id="tender_no" placeholder="Tender No."/> 
+								</div>
+							</div>  -->
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="amount" class="control-label">Amount</label>
+									<input type="text" class="form-control" name="amount" id="amount" placeholder="Amount"/> 
+								</div>
+							</div> 
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="bid_date" class="control-label">Bid Security Date</label>
+									<div class="input-group date" id="bid_date_picker" data-date-format="yyyy-mm-dd">
+										<input class="form-control" name="bid_date" id="bid_date" type="text" placeholder="Bid Security Date" value="<?php echo date('Y-m-d');?>" readonly>
+										<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="bid" class="control-label">Bid Security</label>
+									<input type="text" class="form-control" name="bid" id="bid" value="0.00"/> 
+								</div>
+							</div> 
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="bid_exp_date" class="control-label">Bid Security Expiry Date</label>
+									<div class="input-group date" id="bid_exp_date_picker" data-date-format="yyyy-mm-dd">
+										<input class="form-control" name="bid_exp_date" id="bid_exp_date" type="text" placeholder="Bid Security Expiry Date" value="<?php echo date('Y-m-d');?>" readonly>
+										<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- <div class="row">
+							<div class="col-lg-12"> 
+								<h4>Purchase Order Details</h4>
+								<div>
+								<table id="purchase_field" class="table small-padding">
+								<tbody>
+									<tr>
+									<td class="col-lg-2 input-cell">
+											<div class="form-group">
+											<label for="item_class" class="control-label">Item Class</label>
+												<select class="form-control tr_item_class" name="item_class[]" id="item_class" data-placeholder="Select">
+													<option value=""></option>
+													<?php foreach($itemcls as $itemclass):?>
+													<option value="<?php echo $itemclass['id'];?>"><?php echo $itemclass['item_class'];?>
+													</option>
+													<?php endforeach;?>
+												</select> 
+											</div>
+										</td>
+										<td class="col-lg-2 input-cell">
+											<div class="form-group" id="item_container">
+											<label for="item" class="control-label">Item</label>
+												<select class="form-control tr_item" name="item[]" id="item" data-placeholder="Select">
+													<option value="0"></option>
+													<//?php foreach($item as $items):?>
+													<option value="<?php echo $items['id'];?>"><?php echo $items['name'];?>
+													</option>
+													<//?php endforeach;?>
+												</select> 
+											</div>
+											<div class="form-group" id="asst_container" style="display:none;">
+											<label for="item_name" class="control-label">Item</label>
+												<input class="form-control tr_item_name" name="item_name[]" id="item_name" data-placeholder="Select" value="null">
+											</div>
+										</td>
+										<td class="col-lg-2 input-cell">
+											<div class="form-group">
+											<label for="subhead" class="control-label">Subhead</label>
+												<select id="subhead" name="subhead[]" class="form-control tr_subhead" data-placeholder="Select">
+													<option value=""></option>
+												</select>
+											</div>
+										</td>
+										<td class="col-lg-2 input-cell">
+											<div class="form-group">
+											<label for="basic_uom" class="control-label">Unit of Measurement</label>
+												<select id="uom" name="uom[]" class="form-control tr_uom" data-placeholder="Select" >
+													<option value="1"></option>
+												</select>
+											</div>
+										</td>
+										<td class="col-lg-1 input-cell">
+											<div class="form-group">
+											<label for="quantity" class="control-label">Quantity</label>
+												<input type="text" class="form-control tr_quantity" name="quantity[]" id="quantity"  required/>
+											</div>
+										</td>
+										<td class="col-lg-1 input-cell">
+											<div class="form-group">
+											<label for="rate" class="control-label">Rate</label>
+												<input type="text" class="form-control tr_rate" name="rate[]" id="rate"  required/>
+											</div>         
+										</td>
+										<td class="col-lg-1 input-cell">
+											<div class="form-group">
+											<label for="amount" class="control-label">Amount</label>
+												<input type="text" class="form-control tr_amount" name="amount[]" id="amount" value="0.00" readonly/>
+											</div>         
+										</td>
+										<td class="col-lg-2 input-cell">
+											<div class="form-group">
+											<label for="remarks" class="control-label">Remarks</label>
+												<input type="text" class="form-control tr_remarks" placeholder="Remarks" name="remarks[]" id="remarks"/>
+											</div>
+										</td>
+										<td>
+										    <br>
+											<button class="btn btn-sm btn-success" type="button"  onclick="purchase_field();"> <span class="fa fa-plus-square" aria-hidden="true"></span> </button>
+										</td>
+									</tr> 
+								</tbody>
+								<table>
+									<div class="clear"></div>
+								</div>
+							</div>
+						</div>
+						<div class="row"> 
+							<div class="col-lg-9"></div>
+							<div class="col-lg-3">
+								<div class="form-group">
+									<label for="po_amount">Net Amount(<?php //echo $this->currency_code();?>)</label>
+									<input type="text" class="form-control tr_po_amount" name="po_amount" id="po_amount" value="0.00" readonly />
+								</div>
+							</div> 
+						</div>	 -->
+						<div class="row">
+							<div class="col-lg-12">
+								<label class="control-label" for="note">Note: </label>
+								<textarea class="form-control" name="note" id="note"></textarea>
+							</div>
+						</div>
+						<div class="space-12"></div>
+						<div class="row"> 	
+							<div class="col-lg-9"> 
+								<button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Save </button>
+								<button type="button" class="btn btn-warning" onclick="javascript:history.back();" ><i class="fa fa-times"></i> Cancel </button> 					
+							</div>
+						</div>
+					</form>	
+				</div><!-- widget widget-main -->
+			</div>  <!-- widget widget-body -->   
+		</div> <!-- widget widget-box --> 
+	</div><!-- col-lg-12 -->
+</div><!-- row -->
+
+<script type="text/javascript">
+$(function() {
+
+    $('#tender_date_picker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+
+    $('#bid_date_picker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+    $('#bid_exp_date_picker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+
+ 
+    // $('#bid_date_picker').on('changeDate', function() {
+    //     var selectedBidDate = new Date($('#bid_date').val());
+    //     var currentDate = new Date();
+
+      
+    //     $('#bid_date').removeClass('is-invalid');
+    //     $('#bid_date').css('border-color', ''); 
+
+       
+    //     if (selectedBidDate > currentDate) {
+    //        lid');
+    //         $('#bid_date').css('border-color', '#d9534f'); 
+    //     }
+    // });
+});
+
+</script>
+
+<style>
+#bid_date_warning {
+    color: #d9534f; /* Red */
+    font-size: 12px;
+    margin-top: 5px;
+}
+</style>

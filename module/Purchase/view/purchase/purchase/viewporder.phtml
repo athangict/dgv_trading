@@ -1,0 +1,183 @@
+<?php
+/**
+ * 
+ * View -- of Purchase/PurchaseController/viewporder
+ * 
+ */
+?>
+<?php 
+    foreach($this->purchase_order as $row):
+        extract($row);
+        $po_status = $status; 
+        $po_id = $id; 
+    endforeach;
+
+  
+?>
+<style>
+	.mytable tr th,.mytable tr td {
+		padding:5px;
+	}
+</style>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="widget widget-box">
+			<form method="post" action="<?php echo $this->url('receipt', array('action' => 'addreceipt')); ?>" >
+				<div class="widget-header">
+					<h5 class="widget-title lighter smaller">
+						# Purchase Order Details:<strong>&nbsp;&nbsp;<?php echo $po_no; ?> | <?//php echo $supplier; ?></strong>&nbsp;
+						<?php $this->status($status);?>
+					</h5>
+					<input type="hidden" name="porder" id="porder" value="<?php echo $po_id;?>" />
+					<div class="widget-toolbar hidden-xs">
+						<?php if($status == 2):?> <!--if po qty and received qty not equal-->
+							<button type="submit" class="btn btn-white btn-success btn-bold btn-xs"><i class="fa fa-step-forward"></i> Purchase Receipt </button>
+						<?php endif;?>
+					</div>
+					<div class="widget-toolbar hidden-xs">
+						<div class="btn-list">
+								<?php //if($edit_option){ echo $this->button(2,$row['id']); }?>
+								<span data-bs-toggle='tooltip' data-bs-placement='top' title='PDF Print'>
+									<a class='btn btn-danger btn-xs' id="print">
+									<i class="ace-icon fa fa-file-pdf-o bigger-120"></i></a></span>
+						</div>
+			        </div>
+				</div>
+			</form><br>
+
+			<div class="widget-body" id="print-content">
+				<div class="widget-main padding-12">
+					<div id="report-print">
+						<div class="row" id="convert-tb0">
+							<div class="col-lg-8" id="convert-tb1">
+										<b>Purchase Order no : <b class="red"><?php echo $po_no; ?></b></b><br>
+										
+										
+										
+									 	
+									<br><br>
+										 <?php 
+												$addresses = preg_split('/[,\.]/', $address ?? '');
+												echo $addresses[0]; // Print the first address
+
+												if (count($addresses) > 1) {
+													echo "<br>"; // Add spaces for alignment
+													echo implode("<br>", array_slice($addresses, 1)); // Print remaining addresses with same indentation
+												} 
+												?>
+					                <br><br>
+										<b>Subject :</b> <b class="red"><u><?php echo $subject; ?></b></u>
+							</div>
+						</div><br>
+						
+						<div class="space-6"></div>
+						<div class="row">
+							<div class="col-lg-12" >
+								<table style="width:100%" border="1">
+									<thead>
+										<tr style="height:30px; border-bottom: 1px solid #bbb;">
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">#</th>
+											<!-- <th>Item Class</th> -->
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Item</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold;height:30px;">Specification</th> 
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Unit</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Quantity</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Rate</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">GST_Rate</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Amount</th>
+											<th style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Remarks</th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php $sl = 1; 
+											foreach($this->PODObject->get(array('purchase_order' => $po_id)) as $tdrow):
+													$qty = $tdrow['quantity'];
+													$rate = $tdrow['rate'];
+													
+													$amt = $qty * $rate;
+											?>
+											<tr>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $sl++; ?></td>
+												<!-- <td><?php echo $this->classObj->getColumn($tdrow['item_class'],'item_class');?></td> -->
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo ($tdrow['item_class']==33)?$tdrow['item_name']:$this->itemObj->getColumn($tdrow['item'],'name');?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $tdrow['specification'];?></td> 
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $this->uomObj->getColumn($tdrow['uom'],'code');?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $tdrow['quantity'];?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $tdrow['rate'];?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $tdrow['gst']??'';?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo number_format((float)$amt, 2, '.', '');?></td>
+												<td style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"><?php echo $tdrow['remarks'];?></td>
+											</tr>
+										<?php endforeach;?>
+										<tr style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">
+											<th colspan="6" style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"></th>
+											<th colspan="1" style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Total : </th>
+											<th colspan="1"  style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Nu <?php echo $po_amount;?></th>
+										
+										</tr>
+										<tr style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">
+											<th colspan="6" style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;"></th>
+											<th colspan="1" style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Grand Total : </th>
+											<th colspan="1"  style="border: 1px solid black; padding: 6px;text-align: center; font-weight: bold; height:30px;">Nu <?php echo $po_amount;?></th>
+										
+										</tr>
+									</tbody>
+								</table><br>
+
+								<div>
+									<p><strong>Yours sincerely,</strong></p>
+
+									<div style="position: relative; height: 70px;">
+										<!-- <img src="<?php echo $this->basePath(); ?>/images/SD e-sign.jpg" style="height: 60px; width: auto;" /> -->
+										 <img src="<?php echo $this->basePath(); ?>/images/Signature.png" style="height: 65px; width: auto;" />
+										 <img src="<?php echo $this->basePath(); ?>/images/Eseal_PO_Sbill.jpg" style="position: absolute; left: 140px; top: -30px; height: 100px; width: auto;" />
+										<!-- <img src="<?php echo $this->basePath(); ?>/images/e-seal.jpeg" style="position: absolute; left: 140px; top: -30px; height: 100px; width: auto;" /> -->
+									</div>
+
+									<p><strong>Sonam Dorji</strong></p> 
+									<p><strong>Associate Marketing & Procurement Officer</strong></p> 
+								</div>								<hr>
+								<div style="display: flex; justify-content: space-between; font-size: 7px;">
+									<div>
+										<p>Building No.106,</p>
+										<p>Norzin Lam SE, Chubachu,</p>
+										<p>Thimphu, Bhutan</p>
+									</div>
+									<!-- <div class="contact-info">
+										<p>Email: dheyma@gmail.com</p>
+										<p>Contact No: 10243024304032</p>
+										<p>www.dheyma.com</p>
+									</div> -->
+
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-7">
+						</div>
+						<div class="col-lg-5" style="text-align: right">
+							<?php if($po_status == '2'): ?>
+								<a href="<?php echo $this->url('purorder', array('action'=>'commitporder', 'id'=>$po_id));?>" class="btn btn-danger"> <i class="fa fa-thumbs-o-up"></i> Commit </a>
+								<a href="<?php echo $this->url('purorder', array('action'=>'editporder', 'id'=>$po_id));?>" class="btn btn-info"> <i class="fa fa-pencil-square-o"></i> Edit </a>
+							<?php endif;?>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function () {
+		$('#print').gentcpdf({
+		content: '#print-content',
+		src:"<?php echo $this->url('print', array('action' => 'index'));?>",
+		orentation:"P",
+		size: 'A4',
+	});
+});
+
+</script>

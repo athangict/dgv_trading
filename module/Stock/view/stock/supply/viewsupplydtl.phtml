@@ -1,0 +1,316 @@
+<?php
+/**
+ * 
+ * View -- of Purchase/PurchaseController/viewporder
+ * 
+ */
+?>
+<?php 
+	foreach($this->supply as $row ):
+		extract($row);
+		$po_status = $status; 
+	endforeach;
+	foreach($company as $com);
+	$spd = $this->supplydObj->get(array('supply_address' => $id));
+
+	$size = 9; 
+	foreach ($spd as $rep) {
+		if (in_array($rep['item_class'], [1,2,3,4,5,6])) {
+			$size = 12;
+			break; 
+		}
+	}
+	
+?>
+<style>
+	.mytable tr th,.mytable tr td {
+		padding:5px;
+	}
+	.mytable {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .mytable th, .mytable td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        padding: 5px;
+    }
+
+    .mytable tr {
+        height: 30px !important;
+    }
+    
+    /* Add table container to handle overflow */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 15px;
+    }
+    
+    /* Ensure table takes full width */
+    .full-width-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .full-width-table td, 
+    .full-width-table th {
+        border: 1px solid black;
+        padding: 6px;
+        text-align: center;
+    }
+    
+    .text-left {
+        text-align: left;
+    }
+	
+</style>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="widget widget-box">
+				<div class="widget-header">
+					<h5 class="widget-title lighter smaller">
+						# Invoice Details:<strong>&nbsp;&nbsp;<?php echo $supply_no; ?></strong>
+						<?php $this->status($status);?>
+					</h5>
+					<input type="hidden" name="supply" id="supply" value="<?php echo $supply;?>" />
+					<div class="widget-toolbar hidden-xs">
+						<div class="btn-list">
+								<?php //if($edit_option){ echo $this->button(2,$row['id']); }?>
+								<span data-bs-toggle='tooltip' data-bs-placement='top' title='PDF Print'>
+									<a class='btn btn-danger btn-xs' id="print">
+									<i class="ace-icon fa fa-file-pdf-o bigger-120"></i></a></span>
+							</div>
+					</div>
+				</div>
+            <div class="widget-body" id="print-content">
+				<div class="widget-main padding-12">
+					<div id="report-print">
+						<div class="row">
+							<div class="col-lg-12">
+							    <div class="table-responsive">
+    								<table class="full-width-table" border="1">
+    									<!-- Header with Invoice No and Date -->
+    									<tr style="border: 1px solid black;">
+    									    <td colspan="<?php echo $size; ?>" style="position: relative; border: 1px solid black; padding: 10px;">
+    									        <div style="display: flex; justify-content: space-between; width: 100%;">
+    									            <span>Invoice No: <b class="red"><?php echo "DGV/DI/12/" . date("Y", strtotime($date)) . "/&nbsp;" . sprintf('%02d', $supply_no); ?></b></span>
+    									            <span>Date: <b class="red"><?php echo $this->dateformat($date); ?></b></span>
+    									        </div>
+    									        <br>
+    									        <div style="text-align: left;">
+        									        <?php 
+        												$addresses = preg_split('/[,\.]/', $address);
+        												echo "To: " . $addresses[0];
+        
+        												if (count($addresses) > 1) {
+        													echo "<br>&nbsp;&nbsp;"; 
+        													echo implode("<br>&nbsp;&nbsp;", array_slice($addresses, 1)); 
+        												}
+        											?>
+    									        </div>
+    									        <br><br>
+    									    </td>
+    									</tr>
+    								
+    								<?php 
+    										$hasItemClass = false; 
+    										foreach ($this->supplydObj->get(array('supply_address' => $id)) as $tdrow) {
+    											if (in_array($tdrow['item_class'], [1,2,3 ,4,5,6])) {
+    												$hasItemClass = true;
+    												break;
+    											}
+    										}
+    									
+    										if ($hasItemClass) {
+    											// Column widths for items with manufacturing/expiry dates
+    											$colWidths = [
+    											   'sl' => '5%',
+                                                   'description' => '16%',
+                                                   'tender' => '7%',
+                                                   'unit' => '6%',
+                                                   'batch' => '7%',
+                                                   'mfg' => '7%',
+                                                   'exp' => '7%',
+                                                   'qty' => '7%',
+                                                   'rate' => '7%',
+                                                   'gst_amt' => '6%',
+                                                   'amount' => '12%',
+                                                   'total' => '13%'
+    											];
+    										} else {
+    											// Column widths for items without manufacturing/expiry dates
+    											$colWidths = [
+    											    'sl' => '6%',
+      											    'description' => '20%',
+       											    'tender' => '9%',
+        											'unit' => '7%',
+       											    'batch' => '9%',
+       											    'qty' => '9%',
+        											'rate' => '9%',
+       											    'gst_amt' => '8%',
+        											'amount' => '11%',
+        											'total' => '12%'
+    											];
+    										}
+    									?>
+
+    									<!-- Table Header -->
+    									<tr style="height:30px;">
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['sl']; ?>;">Sl.no</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['description']; ?>;">Description</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['tender']; ?>;">Tender Sl.No</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['unit']; ?>;">Unit</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['batch']; ?>;">Batch No</th>
+
+    										<?php if ($hasItemClass): ?>
+    											<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['mfg']; ?>;">Mftg. Date</th>
+    											<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['exp']; ?>;">Exp. Date</th>
+    										<?php endif; ?>
+
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['qty']; ?>;">Quantity</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['rate']; ?>;">Rate</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['gst_amt']; ?>;">GST_Amt </th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['amount']; ?>;">Amount</th>
+											<th style="border: 1px solid black; padding: 6px; text-align: center; font-weight: bold; width: <?php echo $colWidths['total']; ?>;">Total</th>
+    									</tr>
+
+    									<?php $sl = 1; $amount = 0; $totalGst = 0;?>
+    									<?php foreach ($this->supplydObj->get(array('supply_address' => $id)) as $tdrow): ?>
+    									    <?php if (in_array($tdrow['item_class'], [1,2,3,4,5,6])): ?> 
+    									        <tr style="height:30px;">
+    										        <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $sl++; ?></td>
+    										        <td style="border: 1px solid black; padding: 6px; text-align: left;"><?php echo $this->itemObj->getColumn($tdrow['item'], 'name'); ?></td>
+    										        <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['tender_slNo']; ?></td>
+    										        <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $this->uomObj->getColumn($tdrow['uom'], 'code'); ?></td>
+    										        <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['batch_no']; ?></td>
+
+    											    <?php if ($hasItemClass): ?>
+    												    <?php if (in_array($tdrow['item_class'], [1,2,3,4,5,6])): ?>
+    													    <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['manufactured_date']; ?></td>
+    													    <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['expiry_date']; ?></td>
+    												    <?php else: ?>
+    													    <td style="border: 1px solid black; padding: 6px; text-align: center;"></td>
+    													    <td style="border: 1px solid black; padding: 6px; text-align: center;"></td>
+    												    <?php endif; ?>
+    											    <?php endif; ?>
+
+    											    <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['quantity']; ?></td>
+    											    <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo $tdrow['rate']; ?></td>
+    											    <td style="border: 1px solid black; padding: 6px; text-align: center;"><?php echo isset($tdrow['gst_amt']) && $tdrow['gst_amt'] !== '' ? $tdrow['gst_amt'] : 0; ?></td>
+    											    <td style="border: 1px solid black; padding: 6px; text-align: right;"><?php echo number_format($tdrow['amount'], 2); ?></td>
+													<td style="border: 1px solid black; padding: 6px; text-align: right;"><?php echo number_format($tdrow['amount'] + $tdrow['gst_amt'], 2); ?></td>
+    										    </tr>
+    										   <?php
+                                                 $rowAmount = $tdrow['amount'];
+                                                 $gstAmount = $tdrow['gst_amt'];
+
+                                                 $amount += $rowAmount;
+                                                 $totalGst += $gstAmount;
+												 $grandTotal = $amount + $totalGst;
+                                               ?>
+    									    <?php endif; ?>
+    									<?php endforeach; ?>
+
+    									<?php
+    										// Convert amount to words
+											
+    										$numberFormatter = new NumberFormatter("en", NumberFormatter::SPELLOUT);
+    										$amountInWords = ucfirst($numberFormatter->format($grandTotal));
+    									?>
+    									
+    									<!-- Total Row -->
+    									<tr style="height:30px;">
+    									    <?php $totalColspan = $hasItemClass ? 11 : 9; ?>
+    										<th colspan="<?php echo $totalColspan; ?>" style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Total:</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;"><?php echo number_format($amount, 2); ?></th>
+    									</tr>
+
+										<!-- GST_Total -->
+										 <tr style="height:30px;">
+    									    <?php $totalColspan = $hasItemClass ? 11 : 9; ?>
+    										<th colspan="<?php echo $totalColspan; ?>" style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">GST_Total:</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;"><?php echo number_format($totalGst, 2); ?></th>
+    									</tr>
+                                        
+										<!-- Grand Total -->
+										<tr style="height:30px;">
+    									    <?php $totalColspan = $hasItemClass ? 11 : 9; ?>
+    										<th colspan="<?php echo $totalColspan; ?>" style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;">Grand Total:</th>
+    										<th style="border: 1px solid black; padding: 6px; text-align: right; font-weight: bold;"><?php echo number_format($amount + $totalGst, 2); ?></th>
+    									</tr>
+
+    									<!-- Amount in Words Row -->
+    									<tr style="border: 1px solid black;">
+                                         <td colspan="<?php echo $size; ?>" style="border: 1px solid black; padding: 10px; text-align: left;">
+                                         <br>
+                                         <b>Amount In Words:</b> Ngultrum <?php echo $amountInWords; ?> only.
+                                         <br><br>
+                                         </td>
+                                        </tr> 
+    									
+    									<!-- Bank Details Row -->
+                                       <tr>
+                                         <?php $detailsColspan = $hasItemClass ? 8 : 6; ?>
+                                         <td colspan="<?php echo $detailsColspan; ?>" style="border: 1px solid black; padding: 6px; vertical-align: top; text-align: left;">
+                                         &nbsp;&nbsp;CD Account No. <?php echo $com['account_no'];?><br>
+                                         &nbsp;&nbsp;Account Name: <?php echo $com['account_name'];?> <br>
+                                         &nbsp;&nbsp;<?php echo $this->bankObj->getColumn($com['bank'],'bank_code');?> Ltd. Thimphu Bhutan<br>
+                                         &nbsp;&nbsp;TPN NO.: <?php echo $com['tpn_no'];?><br>
+                                         &nbsp;&nbsp;GST NO.: <?php echo $com['gst_no'];?>
+                                        </td>
+                                         <td rowspan="2" colspan="<?php echo $size - $detailsColspan; ?>" style="text-align: center; border: 1px solid black; vertical-align: middle;">
+                                         <div style="position: relative; display: inline-block;">
+                                         <img src="<?php echo $this->basePath(); ?>/images/sseal.png" style="height: 70px; width: auto;" />
+                                         <img src="<?php echo $this->basePath(); ?>/images/Eseal_PO_Sbill.jpg" style="position: absolute; left: 80px; top: -10px; height: 80px; width: auto;" />
+                                         </div>
+                                         <div style="margin-top: 20px;">
+                                         <b>Signature and Seal of Authorized Signatory</b>
+                                        </div>
+                                        </td>
+                                        </tr>
+
+                                   <!-- Contact Details Row -->
+										<tr>
+    										<td colspan="<?php echo $detailsColspan; ?>" style="border: 1px solid black; padding: 6px; vertical-align: top; text-align: left;">
+       										 &nbsp;&nbsp;Email: <?php echo $com['email'];?><br>
+       										 &nbsp;&nbsp;Contact No. +975-<?php echo $com['contact_no'];?><br>
+        									&nbsp;&nbsp;<?php echo $com['website'];?>
+    										</td>
+										</tr>
+    									
+    									
+    								</table>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+    						<div class="col-lg-7">
+    						</div>
+    						<div class="col-lg-5" style="text-align: right">
+    							<?php if($po_status == '2'): ?>
+    								<a href="<?php echo $this->url('supply', array('action'=>'commitsupplydtl', 'id'=>$id));?>" class="btn btn-danger"> <i class="fa fa-thumbs-o-up"></i> Commit </a>
+    							<?php endif;?>
+    						</div>
+    					</div> 
+					</div> 
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function () {
+		$('#print').gentcpdf({
+		content: '#print-content',
+		src:"<?php echo $this->url('print', array('action' => 'indexs'));?>",
+		orentation:"P",
+		size: 'A4',
+	});
+});
+</script>

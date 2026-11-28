@@ -1,0 +1,145 @@
+<?php
+/**
+ * View -- of Application/IndexController/panel1Action
+ * chophel@athang.com
+ */
+	$this->headTitle($title);
+	$period_name=$periodObj->getColumn($period_id,'period');
+?>
+<?php echo $this->tabs_helper(array(5,6)); ?>
+<div class="page-header">
+    <div class ="row">
+		<div class ="col-lg-6">
+			<h1>Dashboard</h1>
+		</div>
+	</div>
+</div>
+<div class ="row">
+	<form id="#form" method="post" action="<?php echo $this->url('application',array('action'=>'panel3')); ?>"  enctype="multipart/form-data" >
+			<div class="col-lg-2">
+				<label for="period" class="control-label"><b>Period</b> </label>
+				<select name="period" id="period" class="form-control" onchange='this.form.submit()'>
+					<option value=""></option>
+					<?php foreach($period as $periods):?>
+						<option value="<?php echo $periods['id'];?>" <?php echo ($period_id==$periods['id'])?'selected':'';?>>
+							<?php echo $periods['period']; ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+		</form>
+	</div>
+	<br><!-- /.page-header -->
+<div class="page-body">
+	<div class="container-xl">
+		<div class="row row-deck row-cards">
+		    <div class="col-lg-12">
+				<div class="card">
+					<div class="card-body">
+					<h3 class="card-title" align="center">Financial Target Vs (Tender & Supply) Amount</h3><br>
+						<div id="chart1"  class="canvas-chart"></div>
+						<?php
+							$Total_target = array();
+							$Total_revenue = array();
+							$Total_supply = array();
+								if($period_id==3){
+								foreach($this->targetObj->getDistinct('year') as $year):
+								 $target_amount = $this->targetObj->getColumn(array('type'=>3,'year'=>$year,'period'=>$period_id), 'amount');
+								$target_amount=($target_amount)?$target_amount:0;
+								array_push($Total_target,array("label"=>$year,"y"=>$target_amount));
+								$acutal_amount =$tenderObj->getSumA('amount',$year,array('status'=>21));
+								array_push($Total_revenue,array("label"=>$year,"y"=>$acutal_amount));
+								$supply_amount =$supplyAObj->getSumA('amount',$year,array('status'=>4));
+								//print_r($supply_amount);
+								array_push($Total_supply,array("label"=>$year,"y"=>$supply_amount));
+								
+							endforeach;}
+							
+							elseif($period_id==1)
+							{
+								foreach($quater as $q):
+									$target_amount = $this->targetObj->getColumn(array('type'=>3,'year'=>date('Y'),'period'=>$period_id,'sub_period'=>$q['id']), 'amount');
+									$target_amount=($target_amount!=null)?$target_amount:0;
+								array_push($Total_target,array("label"=>$q['name'],"y"=>$target_amount));
+								$acutal_amount =$this->tenderObj->getSumQuaterly('amount',$q['id'], array('status'=>21));
+								array_push($Total_revenue,array("label"=>$q['name'],"y"=>$acutal_amount));								$supply_amount =$this->supplyAObj->getSumQuaterly('amount',$q['id'], array('status'=>4));
+								array_push($Total_supply,array("label"=>$q['name'],"y"=>$supply_amount));
+								endforeach;
+							}
+							else{
+								foreach($halfy as $h):
+									$target_amount = $this->targetObj->getColumn(array('type'=>3,'year'=>date('Y'),'period'=>2,'sub_period'=>$h['id']), 'amount');
+									$target_amount=($target_amount!=null)?$target_amount:0;
+									//print_r($tender_submitted);
+								array_push($Total_target,array("label"=>$h['name'],"y"=>$target_amount));
+								$acutal_amount =$this->tenderObj->getSumhalfyear('amount',$h['id'],array('status'=>21));
+								array_push($Total_revenue,array("label"=>$h['name'],"y"=>$acutal_amount));
+								$supply_amount =$this->supplyAObj->getSumhalfyear('amount',$h['id'],array('status'=>4));
+								array_push($Total_supply,array("label"=>$h['name'],"y"=>$supply_amount));
+								endforeach;
+
+							}
+						?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$('.app_icon').each(function(){
+		$(this).bind('click',function(){
+			location.href=$(this).attr('data-url');
+		});
+	});
+	$(function () {
+		 var chart1 = new CanvasJS.Chart("chart1", {
+           animationEnabled: true,
+			exportFileName: "TotalTender",
+            exportEnabled: true,
+            legend: {
+            verticalAlign: "center",
+                horizontalAlign: "right",
+				
+             },
+            axisX: {
+              title:"<?php echo $period_name;?>",
+                interval: 1
+            },
+            axisY: {
+                title: "Amount"
+            },
+           data: [
+				{
+					type: "column",
+					color: "#2471a3", // green
+					legendText: "Financial Target",
+					showInLegend: true,
+					toolTipContent: "Financial Target: {y}",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Total_target, JSON_NUMERIC_CHECK); ?>
+				},
+				{
+					type: "column",
+					color: "#a569bd", // blue
+					legendText: "Tender Amount",
+					showInLegend: true,
+					toolTipContent: "Tender Amount: {y}",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Total_revenue, JSON_NUMERIC_CHECK); ?>
+				},
+				{
+					type: "column",
+					color: "#9c640c", // amber
+					legendText: "Supply Amount",
+					showInLegend: true,
+					toolTipContent: "Supply Amount: {y}",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Total_supply, JSON_NUMERIC_CHECK); ?>
+				}
+			]
+        });
+        chart1.render();
+
+	});
+</script>

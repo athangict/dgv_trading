@@ -1,0 +1,381 @@
+<?php
+/**
+ * 
+ * View -- of Sales/MasterpsController/serviceAction
+ * 
+ */
+
+$this->headTitle($this->title);
+
+?>
+<?php echo $this->partial('hr/leave/partial.phtml', array('active' => 'leavebalancereport')); ?>
+
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-lg-12">
+				<form method="POST" action="<?php echo $this->url('leave', array('action' => 'leavebalancereport')); ?>" enctype="multipart/form-data" >    
+						<div class="row">
+							<div class="form-group col-lg-2">
+								<label class="control-label" for="start_date">Start Date</label>
+								<div class="date input-group" id="start_date" data-date="<?php echo $data['start_date'];?>" data-date-format="yyyy-mm-dd" >
+									<input class="form-control span2" name="start_date" id="start_date" type="text" placeholder="Start Date" value="<?php echo $data['start_date'];?>"  required>
+									<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+							<div class="form-group col-lg-2">
+								<label class="control-label" for="end_date">End Date</label>
+								<div class="date input-group" id="end_date" data-date="<?php echo $data['end_date'];?>" data-date-format="yyyy-mm-dd" >
+									<input class="form-control span2" name="end_date" id="end_date" type="text" placeholder="End Date" value="<?php echo $data['end_date'];?>"  required>
+									<span class="input-group-addon add-on"><i class="fa fa-calendar"></i></span>
+								</div>
+							</div>
+							<div class="form-group col-lg-2">
+								<label for="department" class="control-label">Department</label>
+								<select class="form-control" id="department" name="department" data-placeholder="Select" onchange='this.form.submit()'>
+									<option value="-1">All</option>
+										<?php foreach($this->depObj->getAll() as $deps):?>
+											<option value="<?php echo $deps['id']?>"<?php echo ($deps['id']==$data['department'])?'selected':'';?>>
+											<?php echo $deps['department'];?></option>
+										<?php endforeach;?>
+								</select>
+							</div>
+							<div class="form-group col-lg-2">
+								<label for="division" class="control-label">Division</label>
+								<select class="form-control" id="division" name="division" data-placeholder="Select" onchange='this.form.submit()'>
+									<option value="-1">All</option>
+									<?php foreach ($division as $divs):?>
+										<option value="<?php echo $divs['id']?>"<?php echo ($divs['id']==$data['division'])?'selected':'';?>>
+										<?php echo $divs['activity'];?>	</option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div class="form-group col-lg-2">
+								<label for="location" class="control-label">Location</label>
+								<select class="form-control" id="location" name="location" data-placeholder="Select" onchange='this.form.submit()'>
+									<option value="-1">All</option>
+									<?php foreach ($locations as $location):?>
+										<option value="<?php echo $location['id']?>"<?php echo ($location['id']==$data['location'])?'selected':'';?>>
+										<?php echo $location['location'];?>	</option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-lg-3"></br>
+								<div class="date input-group" >
+								    <button type = "submit" class="btn btn-sm btn-success pull-right"><i class="fa fa-gear"></i> Generate </button>
+								</div>
+							</div>
+					</form>
+				</div>
+			
+		</div>
+	</div>
+	<div class="table-responsive">
+		<table class="table table-striped table-bordered table-hover" id="dataTables">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Name</th>
+					<th>Division</th>
+					<th>Designation</th>
+					<th>Earned Balance</th>
+					<th>Casual Balance</th>
+					<th>Total Balance</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				 $total=0;	$no = 1;
+						foreach($paginator as $row):
+			$employeeID =$row['ld.employee'];
+			$leaveencashMax = $this->leaveenObj->getMax('id',array('employee'=>$employeeID));
+			$leaveencash =  $this->leaveenObj->getColumn(array('id'=>$leaveencashMax,'status'=>4),'encash_date');
+			$encashyear = date('Y',strtotime($leaveencash));
+			//print_r($encashyear);
+			$leaveDate =$this->empObj->getColumn($employeeID, 'leave_balance_date');
+			$leaveBal = $this->empObj->getColumn($employeeID, 'leave_balance');
+			$empLocation = $this->empObj->getColumn($employeeID, 'location');
+			//print_r($leaveBal);exit;
+			if($leaveDate > 0 || $leaveBal > 0):
+				$startDate = $leaveDate;
+				$Balance = $leaveBal;
+			else:
+				$startDate = $this->emphisObj->getColumn(array('employee'=>$employeeID), 'start_date');
+				$Balance = 0;
+			endif; 
+			//$leaveObj = $this->getDefinedTable(Hr\LeaveTable::class);
+			$minYr = date('Y',strtotime($startDate));
+			$minMonth = date('m',strtotime($startDate));
+			$curYr = date('Y');
+			$curMonth = date('m');
+			$presentCasual =0;
+			$presentEarned  =0;
+			
+			$empolyeeMax =  $this->emphisObj->getMax('id',array('employee'=>$employeeID));
+			
+			$empolyeeProbation =  $this->emphisObj->getColumn(array('id'=>$empolyeeMax),'type_of_appointment');
+		
+			$casual = 0;  $earned = 0; $beavement = 0; $extraordinary = 0; $maternity = 0;	$medical = 0;$paternity = 0;$escort = 0;$study = 0;$prep = 0;
+			 $i = 1;	$j = 1;	$k = 1;$l = 1;$m = 1;	$n = 1;	$o = 1;	$p = 1;	$q = 1;	$r = 1;						
+			for($curYear = $curYr; $curYear >= $minYr; $curYear--):			
+				foreach($leavesObj->get(array('employee'=>$employeeID, 'ld.status'=>array(8))) as $leave):
+					$startD = $leave['start_date'];
+					$startYr = date('Y',strtotime($startD));
+					$startMonth= date('m',strtotime($startD));							
+					if($startYr == $curYear):
+						if($leave['leave_type']==2):
+							$casual += $leave['actual_leave_taken'];
+							if($i == 1):
+								 $presentCasual = $casual;
+							endif;// total casual leave used for till current year from given date															
+							$i++;
+						elseif($leave['leave_type']==3):
+							$earned += $leave['actual_leave_taken'];//total earned leave used
+							if($j == 1):
+								$presentEarned = $earned;
+							endif;// total casual leave used for till current year from given date															
+							$j++;
+						elseif($leave['leave_type']==1):
+							$beavement += $leave['actual_leave_taken'];//total Breavement Leave  used
+							if($k == 1):
+								$presentBreavement = $beavement;
+							endif;// total Breavement leave used for till current year from given date															
+							$k++;
+						elseif($leave['leave_type']==4):
+							$extraordinary += $leave['actual_leave_taken'];//total Extraordinary Leave used
+							if($l == 1):
+								$presentExtraordinary = $extraordinary;
+							endif;// total Extraordinary Leave used for till current year from given date															
+							$l++;
+						elseif($leave['leave_type']==5):
+							$maternity += $leave['actual_leave_taken'];//total Maternity Leave used
+							if($m == 1):
+								$presentMaternity = $maternity;
+							endif;// total Maternity Leave used for till current year from given date															
+							$m++;
+						elseif($leave['leave_type']==6):
+							$medical += $leave['actual_leave_taken'];//total Medical Leave used
+							if($n == 1):
+								$presentMedical= $medical;
+							endif;// total Medical Leave used for till current year from given date															
+							$n++;
+						elseif($leave['leave_type']==7):
+							$paternity += $leave['actual_leave_taken'];//total Paternity Leave used
+							if($o == 1):
+								$presentPaternity = $paternity;
+							endif;// total Paternity Leave used for till current year from given date															
+							$o++;
+						elseif($leave['leave_type']==11):
+							$escort += $leave['actual_leave_taken'];//total Escort Leave used
+							if($p == 1):
+								$presentEscort = $escort;
+							endif;// total Escort Leave used for till current year from given date															
+							$p++;
+						elseif($leave['leave_type']==9):
+							$study += $leave['actual_leave_taken'];//total Study Leave used
+							if($q == 1):
+								$presentStudy = $study;
+							endif;// total Study Leave used for till current year from given date															
+							$q++;
+						elseif($leave['leave_type']==8):
+							$prep += $leave['actual_leave_taken'];//total Study Leave used
+							if($q == 1):
+								$presentPrep = $prep;
+							endif;// total Study Leave used for till current year from given date															
+							$r++;
+						endif;	
+					endif;
+				endforeach;											 						 
+			endfor;	
+			//endforeach;
+				$total_years = $curYr - $minYr;
+				$sub_total = 0;
+				if($empolyeeProbation==14):$monthCasual = 5/12;else:$monthCasual = 10/12;endif;
+				//print_r($total_years);exit;
+				if($total_years > 0){
+					$Bmonth = (12 - $minMonth);  //addition of 1 is to include the present month 
+					$Amonth = $curMonth;
+					$sub_total = $Bmonth + $Amonth;
+					$Bcasual = round($Bmonth * $monthCasual);
+					
+					if($total_years == 1):
+						$total_months = $sub_total;	
+						if($empolyeeProbation==14):	$totCasual = 5;else:$totCasual = 10;endif;			
+						$usedcasual = $casual - $presentCasual;
+						$CasualLeft = $Bcasual - $usedcasual;					
+						$totcasualBal = $totCasual - $casual;
+						if($curYr==$encashyear):$totearnedBal = ($Balance + ($total_months * 2.5) - $earned)-30;else:$totearnedBal = $Balance + ($total_months * 2.5) - $earned;endif;
+						/*Breavemnt */
+						$totbreavementBal = 21 - $beavement;
+						/*extraordinary */
+						$totextraordinaryBal = 730 - $extraordinary;
+						/*Maternity */
+						$totmaternityBal = 180 - $maternity;
+						/*Medical */
+						$totmedicalBal = 180 - $medical;
+						/*Paternity */
+						$totpaternityBal = 10 - $paternity;
+						/*Paternity */
+						$totpaternityBal = 10 - $paternity;
+						/*Escort */
+						$totescortBal = 30 - $escort;
+						/*Study */
+						$totstudyBal = 1095 - $study;
+						/**preparotory */
+						$totstudyBal = 7 - $prep;
+					else:
+						$YEAR = $curYr - $minYr - 1;
+						$total_months = ($YEAR * 12) + $sub_total;							
+						$totCasual = $Bcasual + 10 + ($YEAR * 10);
+						$casualBefore = $casual - $presentCasual;
+						$CasualLeft = $Bcasual + ($YEAR * 10) - $casualBefore;						
+						$totcasualBal = $totCasual - $casual;
+						if($curYr==$encashyear):$totearnedBal = ($Balance + ($total_months * 2.5) - $earned)-30;	else:$totearnedBal = $Balance + ($total_months * 2.5) - $earned;endif;	
+						/*Breavemnt */
+						$totbreavementBal = 21 - $beavement;
+						/*extraordinary */
+						$totextraordinaryBal = 730 - $extraordinary;
+						/*Maternity */
+						$totmaternityBal = 180 - $maternity;
+						/*Medical */
+						$totmedicalBal = 180 - $medical;
+						/*Paternity */
+						$totpaternityBal = 10 - $paternity;
+						/*Paternity */
+						$totpaternityBal = 10 - $paternity;
+						/*Escort */
+						$totescortBal = 30 - $escort;
+						/*Study */
+						$totstudyBal = 1095 - $study;
+						/*Prep */
+						$totprepBal = 7 - $prep;							
+					endif;
+				}else{
+					$total_months = $curMonth - $minMonth;
+					$actCasual = (12 - $minMonth + 1) * $monthCasual;
+					$CasualLeft = 0;
+					$actualCasual = round($actCasual);
+					$totcasualBal = $actualCasual - $casual;
+					if($curYr==$encashyear):$totearnedBal = ($Balance + ($total_months * 2.5) - $earned)-30;else:$totearnedBal = $Balance + ($total_months * 2.5) - $earned;endif;
+					/*Breavemnt */
+					$actBreavement = (12 - $minMonth + 1) * 21/12;
+					$BreavementlLeft = 0;
+					$actualBreavement = round($actBreavement);
+					$totbreavementBal = $actualBreavement - $beavement;
+					/*extraordinary */
+					$actExtraordinary = (12 - $minMonth + 1) * 730/12;
+					$ExtraordinarylLeft = 0;
+					$actualExtraordinary = round($actExtraordinary);
+					$totextraordinaryBal = $actualExtraordinary - $extraordinary;
+					/*Maternity */
+					$actMaternity = (12 - $minMonth + 1) * 180/12;
+					$MaternityLeft = 0;
+					$actualMaternity = round($actMaternity);
+					$totmaternityBal = $actualMaternity - $maternity;
+					/*Medical */
+					$actMedical = (12 - $minMonth + 1) * 180/12;
+					$MedicalLeft = 0;
+					$actualMedical = round($actMedical);
+					$totmedicalBal = $actualMedical - $medical;
+					/*Paternity */
+					$actPaternity = (12 - $minMonth + 1) * 10/12;
+					$PaternityLeft = 0;
+					$actualPaternity = round($actPaternity);
+					$totpaternityBal = $actualPaternity - $paternity;
+					/*Escort */
+					$actEscort = (12 - $minMonth + 1) * 30/12;
+					$EscortLeft = 0;
+					$actualEscort = round($actEscort);
+					$totescortBal = $actualEscort - $escort;
+					/*Study */
+					$actStudy = (12 - $minMonth + 1) * 1095/12;
+					$StudyLeft = 0;
+					$actualStudy = round($actStudy);
+					$totstudyBal = $actualStudy - $study;
+					/*PREP */
+					$actPrep = (12 - $minMonth + 1) * 7/12;
+					$PrepLeft = 0;
+					$actualPrep = round($actPrep);
+					$totprepBal = $actualPrep - $prep;
+
+				}
+			$casual_bal = $totcasualBal;if($empolyeeProbation==14): $earned_bal=0;else:
+			$earned_bal = $totearnedBal + $CasualLeft;endif;
+			$casual_leave_used = $casual;
+			$earned_leave_used = $earned;
+			$leave_taken = $casual + $earned;
+			$total_bal = $earned_bal + $casual_bal;
+			/*Breavemnt */
+			$breavement_bal = $totbreavementBal;
+			$beavement_leave_used = $beavement;
+			/*Extraordinary */
+			$extraordinary_bal = $totextraordinaryBal;
+			$extraordinary_leave_used = $extraordinary;
+			/*Maternity */
+			$maternity_bal = $totmaternityBal;
+			$maternity_leave_used = $maternity;
+			/*Medical */
+			$medical_bal = $totmedicalBal;
+			$medical_leave_used = $medical;
+			/*Paternity */
+			$paternity_bal = $totpaternityBal;
+			$paternity_leave_used = $paternity;
+			/*Escort */
+			$escort_bal = $totescortBal;
+			$escort_leave_used = $escort;
+			/*Study*/
+			$study_bal = $totstudyBal;
+			$study_leave_used = $study;
+			/*Prep*/
+			$prep_bal = $totprepBal;
+			$prep_leave_used = $prep;
+			
+			//print_r($beavement_leave_used);exit;
+			if($total_bal > 90){
+					$total_balance = 90;
+			}else{
+					$total_balance = $total_bal;
+			}
+			if($earned_bal > 90){
+					$earned_balance = 90;
+			}else{
+					$earned_balance = $earned_bal;
+			}
+			$balance_ttl=$casual_bal + $earned_bal;
+			if($balance_ttl > 90){
+					$balance = 90;
+			}else{
+					$balance = $balance_ttl;
+			}
+			$no_of_days = '';
+					?>
+					<tr>
+						<td><?php echo $no++; ?> </td>
+						<td><?php echo $row['full_name'];?></td>
+						<td><?php echo $this->divisionObj->getColumn($row['activity'],'activity');?></td>	
+						<td><?php echo $row['designation'];?></td>						
+						<td><b><?php  echo $earned_balance;?><b></td>
+						<td><b><?php  echo $casual_bal;?><b> </td>	
+						<td><b><?php  echo $balance;?><b></td>						
+					</tr><?php endforeach;?>
+				</tbody>
+		</table>
+	</div>
+</div>
+<!-- for modal -->
+<div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$('document').ready(function(){
+	$('#start_date').datepicker();
+	$('#end_date').datepicker();
+	$('#dataTables').DataTable({
+		"paging":   true,
+	});
+});
+</script>

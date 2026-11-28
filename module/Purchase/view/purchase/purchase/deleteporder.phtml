@@ -1,0 +1,20 @@
+<?php 
+/**
+ * View -- of Implementation/ImplementationController/confirmimplementationAction
+ * chophel@athang.com
+ */
+	$this->headTitle($this->title);
+?>
+<?php foreach($purchaseOrder as $porder);?>
+<form method="post" action="<?php echo $this->url('purorder', ['action' => 'deleteporder', 'id' => $porder['id']]); ?>">
+    <div class="modal-header">
+        <h4 class="modal-title">Delete Purchase Order</h4>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you want to delete Purchase Order <strong><?php echo $porder['id']; ?></strong>?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" name="confirm" value="Yes" class="btn btn-danger">Delete</button>
+        <button type="submit" name="confirm" value="No" class="btn btn-primary">Cancel</button>
+    </div>
+</form>

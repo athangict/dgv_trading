@@ -1,0 +1,207 @@
+<?php
+/**
+ * View -- of Application/IndexController/panel2Action
+ * chophel@athang.com
+ */
+	$this->headTitle($title);
+	$period_name=$periodObj->getColumn($period_id,'period');
+?>
+<?php echo $this->tabs_helper(array(5,6)); ?>
+<div class="page-header">
+    <div class ="row">
+		<div class ="col-lg-6">
+			<h1>Dashboard</h1>
+		</div>
+	</div>
+</div>
+<div class ="row">
+	<form id="#form" method="post" action="<?php echo $this->url('application',array('action'=>'panel2')); ?>"  enctype="multipart/form-data" >
+			<div class="col-lg-2">
+				<label for="period" class="control-label"><b>Period</b> </label>
+				<select name="period" id="period" class="form-control" onchange='this.form.submit()'>
+					<option value=""></option>
+					<?php foreach($period as $periods):?>
+						<option value="<?php echo $periods['id'];?>" <?php echo ($period_id==$periods['id'])?'selected':'';?>>
+							<?php echo $periods['period']; ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+		</form>
+	</div>
+	<br><!-- /.page-header -->
+<div class="page-body">
+	<div class="container-xl">
+		<div class="row row-deck row-cards">
+			<div class="col-lg-6">
+                <div class="card">
+                  	<div class="card-body">
+					<h3 class="card-title" align="center">Total Tender Submitted</h3>
+						<div id="chart1"  class="canvas-chart"></div>
+						<?php
+							$Target_tender_submitted = array();
+							$Acutal_tender_submitted = array();
+							if($period_id==3){
+								foreach($this->targetObj->getDistinct('year') as $target):
+								 $tender_submitted = $this->targetObj->getColumn(array('type'=>1,'year'=>$target,'period'=>$period_id), 'number');
+								$tender_submitted=($tender_submitted)?$tender_submitted:0;
+								array_push($Target_tender_submitted,array("label"=>$target,"y"=>$tender_submitted));
+								$tender_submitted1 =$this->tenderObj->getCount($target, array('status'=>[18,21,22]));
+					
+								array_push($Acutal_tender_submitted,array("label"=>$target,"y"=>$tender_submitted1));
+							endforeach;}
+							
+							elseif($period_id==1)
+							{
+								foreach($quater as $q):
+									$tender_submitted = $this->targetObj->getColumn(array('type'=>1,'year'=>date('Y'),'period'=>$period_id,'sub_period'=>$q['id']), 'number');
+									$tender_submitted=($tender_submitted!=null)?$tender_submitted:0;
+								array_push($Target_tender_submitted,array("label"=>$q['name'],"y"=>$tender_submitted));
+								$tender_submitted1 =$this->tenderObj->getCountQuaterly($q['id'], array('status'=>[18,21,22]));
+								array_push($Acutal_tender_submitted,array("label"=>$q['name'],"y"=>$tender_submitted1));
+								endforeach;
+							}
+							else{
+								foreach($halfy as $h):
+									$tender_submitted = $this->targetObj->getColumn(array('type'=>1,'year'=>date('Y'),'period'=>2,'sub_period'=>$h['id']), 'number');
+									$tender_submitted=($tender_submitted!=null)?$tender_submitted:0;
+									//print_r($tender_submitted);
+								array_push($Target_tender_submitted,array("label"=>$h['name'],"y"=>$tender_submitted));
+								$tender_submitted1 =$this->tenderObj->getCounthalfyear($h['id'],array('status'=>[18,21,22]));
+ 
+								array_push($Acutal_tender_submitted,array("label"=>$h['name'],"y"=>$tender_submitted1));
+								endforeach;
+
+							}
+						?>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+                <div class="card">
+                  	<div class="card-body">
+					<h3 class="card-title" align="center">Total Tender Awarded</h3>
+						<div id="chart2"  class="canvas-chart"></div>
+						<?php
+							$Target_tender_awarded = array();
+							$Acutal_tender_awarded = array();
+							if($period_id==3){
+								foreach($this->targetObj->getDistinct('year') as $target):
+								$tender_awarded = $this->targetObj->getColumn(array('type'=>2,'year'=>$target,'period'=>$period_id), 'number');
+								$tender_awarded=($tender_awarded!=null)?$tender_awarded:0;
+								array_push($Target_tender_awarded,array("label"=>$target,"y"=>$tender_awarded));
+								$tender_awarded1 =$this->tenderObj->getCount($target, array('status'=>21));
+								array_push($Acutal_tender_awarded,array("label"=>$target,"y"=>$tender_awarded1));
+							endforeach;
+							}
+							elseif($period_id==1)
+							{
+								foreach($quater as $q):
+									$tender_awarded = $this->targetObj->getColumn(array('type'=>2,'year'=>date('Y'),'period'=>$period_id,'sub_period'=>$q['id']), 'number');
+									//print_r($no_of_pax);exit;
+									$tender_awarded=($tender_awarded!=null)?$tender_awarded:0;
+								array_push($Target_tender_awarded,array("label"=>$q['name'],"y"=>$tender_awarded));
+								$tender_awarded1 =$this->tenderObj->getCountQuaterly($q['id'], array('status'=>21));
+
+								array_push($Acutal_tender_awarded,array("label"=>$q['name'],"y"=>$tender_awarded1));
+								endforeach;
+							}
+							else{
+								foreach($halfy as $h):
+									$tender_awarded = $this->targetObj->getColumn(array('type'=>2,'year'=>date('Y'),'period'=>$period_id,'sub_period'=>$h['id']), 'number');
+									$tender_awarded=($tender_awarded!=null)?$tender_awarded:0;
+								array_push($Target_tender_awarded,array("label"=>$h['name'],"y"=>$tender_awarded));
+								$tender_awarded1 =$this->tenderObj->getCounthalfyear($h['id'],array('status'=>21));
+
+								array_push($Acutal_tender_awarded,array("label"=>$h['name'],"y"=>$tender_awarded1));
+								endforeach;
+
+							}
+						?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+    $(function () {
+		var chart1 = new CanvasJS.Chart("chart1", {
+            animationEnabled: true,
+			exportFileName: "TotalTender",
+            exportEnabled: true,
+            legend: {
+            verticalAlign: "center",
+                horizontalAlign: "right",
+				
+             },
+			
+			axisY: {
+				title: "No. of Tender"
+			},
+            theme: "light",
+			axisX: {
+				 title:"<?php echo $period_name;?>",
+						interval: 1
+					},
+			data: [
+				{
+					type: "column",
+					toolTipContent: "Target Tender:{y}",
+					legendText: "Target Tender",
+					showInLegend: "true",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Target_tender_submitted, JSON_NUMERIC_CHECK); ?>
+				},
+				{
+					type: "column",
+					toolTipContent: "Actual Tender:{y}",
+					legendText: "Actual Tender",
+					showInLegend: "true",
+				//	indexLabel: "#total",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Acutal_tender_submitted, JSON_NUMERIC_CHECK); ?>
+				}
+            ]
+        });
+        chart1.render();
+		var chart2 = new CanvasJS.Chart("chart2", {
+            animationEnabled: true,
+			exportFileName: "TotalTender",
+            exportEnabled: true,
+           legend: {
+                verticalAlign: "center",
+                horizontalAlign: "right",
+				
+             },
+			axisY: {
+				title: "No. of Tender"
+			},
+            theme: "light",
+			axisX: { 
+				title:"<?php echo $period_name;?>",
+						interval: 1
+					},
+			data: [
+				{
+					type: "column",
+					toolTipContent: "Target Tender:{y}",
+					legendText: "Target Tender",
+					showInLegend: "true",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Target_tender_awarded, JSON_NUMERIC_CHECK); ?>
+				},
+				{
+					type: "column",
+					toolTipContent: "Actual Tender:{y}",
+					legendText: "Actual Tender",
+					showInLegend: "true",
+				//	indexLabel: "#total",
+					indexLabelPlacement: "outside",
+					dataPoints: <?php echo json_encode($Acutal_tender_awarded, JSON_NUMERIC_CHECK); ?>
+				}
+            ]
+        });
+        chart2.render();
+	});
+</script>

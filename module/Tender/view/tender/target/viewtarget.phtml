@@ -1,0 +1,92 @@
+<?php
+/**
+ * 
+ * View -- of Purchase/PurchaseController/viewporder
+ * 
+ */
+?>
+<?php 
+	foreach($target as $row ):
+		extract($row);
+	endforeach;
+?>
+<style>
+	.mytable tr th,.mytable tr td {
+		padding:5px;
+	}
+</style>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="widget widget-box">
+				<div class="widget-header">
+					<h5 class="widget-title lighter smaller">
+						# Target Details</strong>&nbsp;
+						<?php $this->status($status);?>
+					</h5>
+					<div class="widget-toolbar hidden-xs">
+					</div>
+				</div>
+            <div class="widget-body" id="print-content">
+				<div class="widget-main padding-12">
+					<div id="report-print">
+						<div class="row">
+							<div class="col-lg-8" id="convert-tb1">
+								<ul class="list-unstyled spaced">
+									<li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										Year : <b class="red"><?php echo $year; ?></b>
+									</li>
+									<li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										Period : <b class="red"><?php echo $this->periodObj->getColumn($period,'period'); ?></b>
+									</li>
+									 <li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										Type : <b class="red"><?php echo $this->typeObj->getCOlumn($type,'type'); ?> </b>
+									</li>
+								</ul>
+							 </div>
+							<div class="col-lg-4" id="convert-tb2">
+								<ul class="list-unstyled spaced">
+									<li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										Amount : <b class="red"><?php echo $amount; ?></b>
+									</li>
+									<li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										Number : <b class="red"><?php echo $number; ?></b>
+									</li>
+									 <li>
+										<i class="ace-icon fa fa-caret-right blue"></i>
+										 Note : <b class="red"><?php echo $note; ?> </b>
+									</li>
+								 </ul>
+								
+						</div> 
+					</div> 
+					 <div class="row">
+						<div class="col-lg-7">
+						</div>
+						<div class="col-lg-5" style="text-align: right">
+							<?php if($status == '2'): ?>
+								<a href="<?php echo $this->url('target', array('action'=>'commit', 'id'=>$id));?>" class="btn btn-danger"> <i class="fa fa-thumbs-o-up"></i> Commit </a>
+								<a href="<?php echo $this->url('target', array('action'=>'edittarget', 'id'=>$id));?>" class="btn btn-info"> <i class="fa fa-pencil-square-o"></i> Edit </a>
+							<?php endif;?>
+						</div>
+					</div> 
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function () {
+		$('#print').gentcpdf({
+		content: '#print-content',
+		src:"<?php echo $this->url('print', array('action' => 'index'));?>",
+		orentation:"P",
+		size: 'A4',
+	});
+});
+
+</script>

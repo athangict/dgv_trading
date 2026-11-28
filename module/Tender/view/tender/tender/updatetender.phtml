@@ -1,0 +1,160 @@
+<?php
+/**
+ * View -- of Administration/MasterController/addbank
+ * chophel@athang.com
+ */
+?>
+<form id="#form" method="post" action="<?php echo $this->url('tender', array('action' => 'updatetender','id'=>$id)); ?>" enctype="multipart/form-data">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<h4 class="modal-title"> <i class="ace-icon fa fa-plus-square-o"></i> <?php echo $this->title; ?></h4>
+    </div>  <!-- /modal-header -->
+    <div class="modal-body">
+		<div class="panel panel-default">
+			<div class="panel-body">  
+				<div class="row">
+					<div class="col-lg-12">
+						<div  class="form-group">
+							<label for="status" class="control-label">Status</label>
+							<select class="form-control status" name="status" id="status" data-placeholder="Select">
+								<option value=""></option>
+								<?php foreach($status as $statu):?>
+								<option value="<?php echo $statu['id'];?>"><?php echo $statu['status'];?>
+								</option>
+								<?php endforeach;?>
+							</select> 
+						</div>
+					</div>
+				</div>
+
+				<div class="row" id="tender-award-amount-field" style="display: none;">
+					<div class="col-lg-12">
+						<div class="form-group">
+							<label for="tender_award_amount" class="control-label">Tender Award Value</label>
+							<input type="text" class="form-control" name="tender_award_amount" id="tender_award_amount" value="0">
+						</div>
+					</div>
+				</div>
+
+
+				<div class="row" id="performance-security-field" style="display: none;">
+				<div class="col-lg-12">
+						<div class="form-group">
+						<label for="psecurity_date" class="control-label">Performance Security Date</label>
+							<div class="input-group date" id="psecurity_date_picker" data-date-format="yyyy-mm-dd">
+								<input class="form-control" name="psecurity_date" id="psecurity_date" type="text" placeholder="Performance Security Date" value="<?php echo date('Y-m-d');?>" readonly>
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12">
+						<div class="form-group">
+							<label for="performance_security" class="control-label">Performance Security Amount</label>
+							<input type="text" class="form-control" name="performance_security" id="performance_security" value="0.00">
+						</div>
+					</div>
+					<div class="col-lg-12">
+						<div class="form-group">
+						<label for="psecurity_exp_date" class="control-label">Performance Security Expiry Date</label>
+							<div class="input-group date" id="psecurity_exp_date_picker" data-date-format="yyyy-mm-dd">
+								<input class="form-control" name="psecurity_exp_date" id="psecurity_exp_date" type="text" placeholder="Performance Security Expiry Date" value="<?php echo date('Y-m-d');?>" readonly>
+								<span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div> <!-- /modal-body -->
+    <div class="modal-footer">
+		<button type="submit" class="btn btn-success"><i class="ace-icon fa fa-check"></i>Save</button>
+        <button type="button" class="btn btn-warning" data-dismiss="modal"><i class="ace-icon fa fa-times"></i>Cancel</button> 
+    </div>
+</form>
+<script>
+$('document').ready(function(){
+
+	$('#psecurity_date_picker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+	$('#psecurity_exp_date_picker').datepicker({
+        format: 'yyyy-mm-dd',
+        autoclose: true
+    });
+
+	 
+	//   $('#psecurity_date_picker').on('changeDate', function() {
+    //     var selectedBidDate = new Date($('#psecurity_date').val());
+    //     var currentDate = new Date();
+
+       
+    //     $('#psecurity_date').removeClass('is-invalid');
+    //     $('#bid_psecurity_datedate').css('border-color', ''); 
+
+       
+    //     if (selectedBidDate > currentDate) {
+            
+    //         $('#psecurity_date').addClass('is-invalid');
+    //         $('#psecurity_date').css('border-color', '#d9534f'); 
+    //     }
+    // });
+
+	const fv = FormValidation.formValidation(document.getElementById('#form'), {
+		fields: {
+			status: {
+				validators: {
+					notEmpty: {
+						message: 'Please select status.'
+					}
+				}
+			},
+			// performance_security: {
+			// 	validators: {
+			// 		notEmpty: {
+			// 			message: 'Please enter performance security.'
+			// 		}
+			// 	}
+			// },
+		},
+		plugins: {
+			trigger: new FormValidation.plugins.Trigger(),
+			bootstrap3: new FormValidation.plugins.Bootstrap3(),
+			submitButton: new FormValidation.plugins.SubmitButton(),
+			defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+		},
+	}).on('core.element.validated', function (e) {
+		if (e.valid) {
+			$('div#'+ e.field.replace('[]','') +'_chosen').removeClass('is-invalid');
+			$('div#'+ e.field.replace('[]','') +'_chosen').addClass('is-valid');
+		} else {
+			$('div#'+ e.field.replace('[]','') +'_chosen').removeClass('is-valid');
+			$('div#'+ e.field.replace('[]','') +'_chosen').addClass('is-invalid');
+		}
+	});
+	$('#status').change(function() {
+		const selectedValue = $(this).val();
+		if (selectedValue == '21') { // Assuming '21' is the ID for 'Awarded'
+			$('#performance-security-field').show();
+			$('#tender-award-amount-field').show();
+		} else {
+			$('#performance-security-field').hide();
+			$('#performance_security').val(''); // Clear the input if not awarded
+			$('#tender-award-amount-field').hide();
+			$('#tender_award_amount').val(''); // Clear the input if not awarded
+		}
+	});
+	$('form select').chosen().change(function () {
+		fv.revalidateField($(this).attr('name'));
+	});
+});
+</script>
+
+<style>
+#psecurity_date_warning {
+    color: #d9534f; /* Red */
+    font-size: 12px;
+    margin-top: 5px;
+}
+</style>
